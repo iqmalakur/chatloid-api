@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String       @id @db.Uuid @default(uuid())
+  username   String       @unique @db.VarChar(100)
+  google_id  String       @db.VarChar(64) @map("googleId")
+  email      String       @unique @db.VarChar(255)
+  name       String       @db.VarChar(100)
+  avatar_url String?      @db.VarChar(255) @map("avatarUrl")
+  created_at DateTime     @db.Timestamp @default(now()) @map("createdAt")
+  updated_at DateTime     @db.Timestamp @updatedAt @map("updatedAt")
+
+  messages   Message[]
+  chatRooms  ChatMember[]
+  contacts   Contact[]    @relation("ContactOwner")
+  inContacts Contact[]    @relation("ContactTarget")
+}
+
+model Contact {
+  user_one_id String   @db.Uuid @map("userOneId")
+  user_two_id String   @db.Uuid @map("userTwoId")
+  is_accepted Boolean  @default(false) @map("isAccepted")
+  created_at  DateTime @db.Timestamp() @default(now()) @map("createdAt")
+
+  userOne     User     @relation("ContactOwner", fields: [user_one_id], references: [id])
+  userTwo     User     @relation("ContactTarget", fields: [user_two_id], references: [id])
+
+  @@id([user_one_id, user_two_id])
+}
+
+model ChatRoom {
+  id         String       @id @db.Uuid @default(uuid())
+  name       String?      @db.VarChar(100)
+  is_group   Boolean      @default(false) @map("isGroup")
+  avatar_url String?      @db.VarChar(255) @map("avatarUrl")
+  created_at DateTime     @db.Timestamp @default(now()) @map("createdAt")
+
+  members    ChatMember[]
+  messages   Message[]
+}
+
+model ChatMember {
+  chat_room_id String   @db.Uuid @map("chatRoomId")
+  user_id      String   @db.Uuid @map("userId")
+  joined_at    DateTime @db.Timestamp @default(now()) @map("joinedAt")
+
+  chatRoom     ChatRoom @relation(fields: [chat_room_id], references: [id])
+  user         User     @relation(fields: [user_id], references: [id])
+
+  @@id([chat_room_id, user_id])
+}
+
+model Message {
+  id           String    @id @db.Uuid @default(uuid())
+  chat_room_id String    @db.Uuid @map("chatRoomId")
+  sender_id    String    @db.Uuid @map("senderId")
+  content      String    @db.Text
+  sent_at      DateTime  @db.Timestamp @default(now()) @map("sentAt")
+  edited_at    DateTime? @db.Timestamp @map("editedAt")
+  deleted_at   DateTime? @db.Timestamp @map("deletedAt")
+
+  chatRoom     ChatRoom  @relation(fields: [chat_room_id], references: [id])
+  sender       User      @relation(fields: [sender_id], references: [id])
+}
