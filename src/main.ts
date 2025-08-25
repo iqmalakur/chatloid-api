@@ -8,6 +8,8 @@ async function bootstrap() {
   const logger = new LoggerUtil('Main');
 
   const app = await NestFactory.create(AppModule, new FastifyAdapter());
+  app.enableCors();
+  logger.info('Loaded app modules');
 
   await app.listen(PORT, '0.0.0.0');
   logger.info(`Application started on port ${PORT}`);
