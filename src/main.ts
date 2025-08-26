@@ -4,6 +4,7 @@ import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { LoggerUtil } from './utils/logger.util';
 import { PORT } from './configs/app.config';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { STATUS_CODES } from 'http';
 
 async function bootstrap() {
   const logger = new LoggerUtil('Main');
@@ -40,6 +41,32 @@ async function bootstrap() {
   logger.info('Access /api to see the API Documentation');
   logger.info('Access /api-json to see the Open API json file');
   logger.info('Access /api-yaml to see the Open API yaml file');
+
+  const requestLogger = new LoggerUtil('Request');
+  const responseLogger = new LoggerUtil('Response');
+
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook('onRequest', (req: any, reply: any, done: any) => {
+      req.startTime = Date.now();
+      requestLogger.http(`${req.method} ${req.originalUrl}`);
+      done();
+    });
+
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook('onSend', (req: any, reply: any, payload: any, done: any) => {
+      const duration = Date.now() - req.startTime;
+
+      responseLogger.debug(`response body: `, payload);
+      responseLogger.http(
+        `${req.method} ${req.originalUrl} - ${reply.statusCode} ${STATUS_CODES[reply.statusCode]} - ${duration}ms`,
+      );
+
+      done();
+    });
 
   await app.listen(PORT, '0.0.0.0');
   logger.info(`Application started on port ${PORT}`);
