@@ -13,6 +13,7 @@ export class LoggerUtil {
   private static instance: LoggerUtil;
 
   private readonly meta = { classname: '' };
+  private readonly hiddenField = ['password', 'token'];
 
   public constructor(classname: string) {
     this.meta.classname = classname;
@@ -63,8 +64,8 @@ export class LoggerUtil {
     return LoggerUtil.instance;
   }
 
-  public debug(message: string, obj?: object) {
-    const data = obj ? this.toJson(obj) : '';
+  public debug(message: string, dataObject?: object | string) {
+    const data: string = dataObject ? this.logFormat(dataObject) : '';
     LoggerUtil.logger.debug(`${message}${data}`, this.meta);
   }
 
@@ -85,7 +86,25 @@ export class LoggerUtil {
     LoggerUtil.logger.error(message, this.meta);
   }
 
-  private toJson(data: object): string {
-    return JSON.stringify(data, null, 2);
+  private logFormat(data: object | string): string {
+    let formattedData: Record<string, any> = {};
+
+    try {
+      if (typeof data === 'string') {
+        formattedData = JSON.parse(data);
+      } else {
+        formattedData = { ...data };
+      }
+    } catch {
+      return data as string;
+    }
+
+    this.hiddenField.forEach((key) => {
+      if (key in formattedData) {
+        formattedData[key] = '[hidden]';
+      }
+    });
+
+    return JSON.stringify(formattedData, null, 2);
   }
 }

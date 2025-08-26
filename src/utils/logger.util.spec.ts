@@ -112,11 +112,35 @@ describe('logger utility test', () => {
     });
 
     it('should return pretty JSON string', () => {
-      const json = (logger as any).toJson({ id: 1, name: 'ucup' });
+      const json = (logger as any).logFormat({ id: 1, name: 'ucup' });
 
       expect(json).toContain('"id": 1');
       expect(json).toContain('"name": "ucup"');
       expect(json).toMatch(/\{\n\s+"id": 1,\n\s+"name": "ucup"\n\}/);
+    });
+
+    it('should return raw string if not valid JSON', () => {
+      const raw = (logger as any).logFormat('not-a-json');
+      expect(raw).toBe('not-a-json');
+    });
+
+    it('should hide sensitive fields', () => {
+      (logger as any).hiddenField = ['password', 'token'];
+
+      const json = (logger as any).logFormat({
+        id: 1,
+        password: 'secret',
+        token: 'abcdef',
+      });
+
+      expect(json).toContain('"password": "[hidden]"');
+      expect(json).toContain('"token": "[hidden]"');
+      expect(json).toContain('"id": 1');
+    });
+
+    it('should handle empty object', () => {
+      const json = (logger as any).logFormat({});
+      expect(json).toBe('{}');
     });
   });
 
