@@ -17,12 +17,12 @@ datasource db {
 model User {
   id         String       @id @db.Uuid @default(uuid())
   username   String       @unique @db.VarChar(100)
-  google_id  String       @db.VarChar(64) @map("googleId")
+  googleId   String       @db.VarChar(64) @map("google_id")
   email      String       @unique @db.VarChar(255)
   name       String       @db.VarChar(100)
-  avatar_url String?      @db.VarChar(255) @map("avatarUrl")
-  created_at DateTime     @db.Timestamp @default(now()) @map("createdAt")
-  updated_at DateTime     @db.Timestamp @updatedAt @map("updatedAt")
+  picture    String       @db.VarChar(255)
+  createdAt  DateTime     @db.Timestamp @default(now()) @map("created_at")
+  updatedAt  DateTime     @db.Timestamp @updatedAt @map("updated_at")
 
   messages   Message[]
   chatRooms  ChatMember[]
@@ -31,48 +31,48 @@ model User {
 }
 
 model Contact {
-  user_one_id String   @db.Uuid @map("userOneId")
-  user_two_id String   @db.Uuid @map("userTwoId")
-  is_accepted Boolean  @default(false) @map("isAccepted")
-  created_at  DateTime @db.Timestamp() @default(now()) @map("createdAt")
+  userOneId  String   @db.Uuid @map("user_one_id")
+  userTwoId  String   @db.Uuid @map("user_two_id")
+  isAccepted Boolean  @default(false) @map("is_accepted")
+  createdAt  DateTime @db.Timestamp() @default(now()) @map("created_at")
 
-  userOne     User     @relation("ContactOwner", fields: [user_one_id], references: [id])
-  userTwo     User     @relation("ContactTarget", fields: [user_two_id], references: [id])
+  userOne    User     @relation("ContactOwner", fields: [userOneId], references: [id])
+  userTwo    User     @relation("ContactTarget", fields: [userTwoId], references: [id])
 
-  @@id([user_one_id, user_two_id])
+  @@id([userOneId, userTwoId])
 }
 
 model ChatRoom {
-  id         String       @id @db.Uuid @default(uuid())
-  name       String?      @db.VarChar(100)
-  is_group   Boolean      @default(false) @map("isGroup")
-  avatar_url String?      @db.VarChar(255) @map("avatarUrl")
-  created_at DateTime     @db.Timestamp @default(now()) @map("createdAt")
+  id        String       @id @db.Uuid @default(uuid())
+  name      String?      @db.VarChar(100)
+  isGroup   Boolean      @default(false) @map("is_group")
+  picture   String?      @db.VarChar(255)
+  createdAt DateTime     @db.Timestamp @default(now()) @map("created_at")
 
-  members    ChatMember[]
-  messages   Message[]
+  members   ChatMember[]
+  messages  Message[]
 }
 
 model ChatMember {
-  chat_room_id String   @db.Uuid @map("chatRoomId")
-  user_id      String   @db.Uuid @map("userId")
-  joined_at    DateTime @db.Timestamp @default(now()) @map("joinedAt")
+  chatRoomId String   @db.Uuid @map("chat_room_id")
+  userId     String   @db.Uuid @map("user_id")
+  joinedAt   DateTime @db.Timestamp @default(now()) @map("joined_at")
 
-  chatRoom     ChatRoom @relation(fields: [chat_room_id], references: [id])
-  user         User     @relation(fields: [user_id], references: [id])
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 
-  @@id([chat_room_id, user_id])
+  @@id([chatRoomId, userId])
 }
 
 model Message {
-  id           String    @id @db.Uuid @default(uuid())
-  chat_room_id String    @db.Uuid @map("chatRoomId")
-  sender_id    String    @db.Uuid @map("senderId")
-  content      String    @db.Text
-  sent_at      DateTime  @db.Timestamp @default(now()) @map("sentAt")
-  edited_at    DateTime? @db.Timestamp @map("editedAt")
-  deleted_at   DateTime? @db.Timestamp @map("deletedAt")
+  id         String    @id @db.Uuid @default(uuid())
+  chatRoomId String    @db.Uuid @map("chat_room_id")
+  senderId   String    @db.Uuid @map("sender_id")
+  content    String    @db.Text
+  sentAt     DateTime  @db.Timestamp @default(now()) @map("sent_at")
+  editedAt   DateTime? @db.Timestamp @map("edited_at")
+  deletedAt  DateTime? @db.Timestamp @map("deleted_at")
 
-  chatRoom     ChatRoom  @relation(fields: [chat_room_id], references: [id])
-  sender       User      @relation(fields: [sender_id], references: [id])
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id])
+  sender     User      @relation(fields: [senderId], references: [id])
 }
