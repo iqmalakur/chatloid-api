@@ -8,7 +8,7 @@ export class AuthRepository extends BaseRepository {
     googleId: string,
   ): Promise<UserSelection | null> {
     return this.prisma.user.findFirst({
-      select: { email: true, name: true, username: true, picture: true },
+      select: { id: true },
       where: { googleId },
     });
   }
@@ -26,6 +26,7 @@ export class AuthRepository extends BaseRepository {
         email: user.email,
         picture: user.picture,
       },
+      select: { id: true },
     });
   }
 }

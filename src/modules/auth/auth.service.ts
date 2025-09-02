@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { BaseService } from '../shared/base.service';
 import { AuthRepository } from './auth.repository';
 import { google } from 'googleapis';
@@ -6,7 +10,13 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
 } from 'src/configs/google.config';
-import { BASE_URL } from 'src/configs/app.config';
+import {
+  BASE_URL,
+  DEFAULT_PICTURE_URL,
+  SECRET_KEY,
+} from 'src/configs/app.config';
+import { zeroPadding } from 'src/utils/common.util';
+import { sign } from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService extends BaseService {
@@ -27,11 +37,59 @@ export class AuthService extends BaseService {
     include_granted_scopes: true,
   });
 
-  public constructor(private readonly authRepository: AuthRepository) {
+  public constructor(private readonly repository: AuthRepository) {
     super();
   }
 
   public getAuthorizationUrl(): string {
     return this.authorizationUrl;
+  }
+
+  public async handleGoogleAuthCallback(code: string): Promise<string> {
+    const { tokens } = await this.oauth2Client.getToken(code);
+    this.oauth2Client.setCredentials(tokens);
+
+    const oauth2 = google.oauth2({
+      auth: this.oauth2Client,
+      version: 'v2',
+    });
+
+    const { data } = await oauth2.userinfo.get();
+
+    if (!data.id || !data.email || !data.name) {
+      throw new UnprocessableEntityException(
+        'Akun Google tidak menyediakan semua data yang diperlukan.',
+      );
+    }
+
+    let user = await this.repository.findUserByGoogleId(data.id);
+
+    if (!user) {
+      const newUser = await this.repository.saveUser({
+        googleId: data.id,
+        email: data.email,
+        name: data.name,
+        picture: data.picture ?? DEFAULT_PICTURE_URL,
+        username: await this.getUsername(data.name),
+      });
+
+      if (!newUser) throw new InternalServerErrorException();
+      user = newUser;
+    }
+
+    const token = sign({ sub: user.id }, SECRET_KEY, { expiresIn: '1w' });
+    return token;
+  }
+
+  private async getUsername(name: string): Promise<string> {
+    const rawUsername = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user';
+    let username = rawUsername;
+    let counter = 1;
+
+    while (await this.repository.isUsernameTaken(username)) {
+      username = `${rawUsername}${zeroPadding(counter++)}`;
+    }
+
+    return username;
   }
 }
