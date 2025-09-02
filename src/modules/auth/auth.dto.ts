@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsJWT, IsNotEmpty, IsString } from 'class-validator';
 
 export class GoogleAuthCallbackParamDto {
   @ApiProperty({
@@ -10,4 +11,18 @@ export class GoogleAuthCallbackParamDto {
     example: 'access_denied',
   })
   public readonly error?: string;
+}
+
+export class GoogleVerificationBodyDto {
+  @ApiProperty({
+    example:
+      'eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2Z...dQsswA.eyJpc3MiOiJodHRwczovL2FjY...jAiwQ.QJ5o-9F...',
+  })
+  @IsNotEmpty({ message: 'idToken harus diisi' })
+  @IsJWT({ message: 'idToken tidak valid' })
+  public readonly idToken: string;
+}
+
+export class GoogleAuthResBody {
+  public readonly token: string;
 }

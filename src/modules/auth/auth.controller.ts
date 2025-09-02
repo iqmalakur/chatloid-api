@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Post,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -12,7 +13,11 @@ import { BaseController } from '../shared/base.controller';
 import { AuthService } from './auth.service';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { CLIENT_AUTHORIZED_URL } from 'src/configs/app.config';
-import { GoogleAuthCallbackParamDto } from './auth.dto';
+import {
+  GoogleAuthCallbackParamDto,
+  GoogleAuthResBody,
+  GoogleVerificationBodyDto,
+} from './auth.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -63,5 +68,15 @@ export class AuthController extends BaseController {
         `${CLIENT_AUTHORIZED_URL}?error=${encodeURIComponent(errorCode)}`,
       );
     }
+  }
+
+  @Post('/google/verify')
+  @HttpCode(HttpStatus.OK)
+  public async verifyGoogleId(
+    request: FastifyRequest<{ Body: GoogleVerificationBodyDto }>,
+  ): Promise<GoogleAuthResBody> {
+    const { idToken } = request.body;
+    const token = await this.service.handleVerifyGoogleId(idToken);
+    return { token };
   }
 }
