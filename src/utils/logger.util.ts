@@ -5,7 +5,7 @@ import {
   transports as WinstonTransports,
 } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { LEVEL, TRANSPORT } from '../configs/logger.config';
+import { LEVEL, TRANSPORT } from 'src/configs/logger.config';
 import { getTimeString } from './date.util';
 
 export class LoggerUtil {

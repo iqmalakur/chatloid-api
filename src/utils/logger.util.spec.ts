@@ -4,7 +4,7 @@ import { LoggerUtil } from './logger.util';
 
 describe('logger utility test', () => {
   describe('logger instance', () => {
-    jest.mock('../configs/logger.config', () => ({
+    jest.mock('src/configs/logger.config', () => ({
       LEVEL: 'debug',
       TRANSPORT: 'console',
     }));
@@ -173,7 +173,7 @@ describe('logger utility test', () => {
     });
 
     it('should configure only Console when TRANSPORT=console', () => {
-      jest.doMock('../configs/logger.config', () => ({
+      jest.doMock('src/configs/logger.config', () => ({
         LEVEL: 'debug',
         TRANSPORT: 'console',
       }));
@@ -191,7 +191,7 @@ describe('logger utility test', () => {
     });
 
     it('should configure only DailyRotateFile when TRANSPORT=file', () => {
-      jest.doMock('../configs/logger.config', () => ({
+      jest.doMock('src/configs/logger.config', () => ({
         LEVEL: 'info',
         TRANSPORT: 'file',
       }));
@@ -209,7 +209,7 @@ describe('logger utility test', () => {
     });
 
     it('should configure both Console and DailyRotateFile when TRANSPORT=both', () => {
-      jest.doMock('../configs/logger.config', () => ({
+      jest.doMock('src/configs/logger.config', () => ({
         LEVEL: 'warn',
         TRANSPORT: 'both',
       }));
