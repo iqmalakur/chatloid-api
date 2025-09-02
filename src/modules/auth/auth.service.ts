@@ -30,4 +30,8 @@ export class AuthService extends BaseService {
   public constructor(private readonly authRepository: AuthRepository) {
     super();
   }
+
+  public getAuthorizationUrl(): string {
+    return this.authorizationUrl;
+  }
 }
