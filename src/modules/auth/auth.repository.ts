@@ -13,6 +13,10 @@ export class AuthRepository extends BaseRepository {
     });
   }
 
+  public async isUsernameTaken(username: string): Promise<boolean> {
+    return (await this.prisma.user.count({ where: { username } })) > 0;
+  }
+
   public async saveUser(user: UserInsert): Promise<UserSelection | null> {
     return this.prisma.user.create({
       data: {
