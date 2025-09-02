@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { BaseService } from '../shared/base.service';
@@ -17,6 +18,7 @@ import {
 } from 'src/configs/app.config';
 import { zeroPadding } from 'src/utils/common.util';
 import { sign } from 'jsonwebtoken';
+import { GoogleUser, UserSelection } from './auth.type';
 
 @Injectable()
 export class AuthService extends BaseService {
@@ -55,7 +57,33 @@ export class AuthService extends BaseService {
     });
 
     const { data } = await oauth2.userinfo.get();
+    const user = await this.findOrCreateGoogleUser(data);
 
+    return this.generateJwt(user);
+  }
+
+  public async handleVerifyGoogleId(idToken: string): Promise<string> {
+    const ticket = await this.oauth2Client.verifyIdToken({
+      idToken,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload) {
+      throw new UnauthorizedException('Token tidak valid.');
+    }
+
+    const user = await this.findOrCreateGoogleUser({
+      ...payload,
+      id: payload.sub,
+    });
+
+    return this.generateJwt(user);
+  }
+
+  private async findOrCreateGoogleUser(
+    data: GoogleUser,
+  ): Promise<UserSelection> {
     if (!data.id || !data.email || !data.name) {
       throw new UnprocessableEntityException(
         'Akun Google tidak menyediakan semua data yang diperlukan.',
@@ -74,11 +102,14 @@ export class AuthService extends BaseService {
       });
 
       if (!newUser) throw new InternalServerErrorException();
-      user = newUser;
+      return newUser;
     }
 
-    const token = sign({ sub: user.id }, SECRET_KEY, { expiresIn: '1w' });
-    return token;
+    return user;
+  }
+
+  private generateJwt(user: UserSelection): string {
+    return sign({ sub: user.id }, SECRET_KEY, { expiresIn: '1w' });
   }
 
   private async getUsername(name: string): Promise<string> {
