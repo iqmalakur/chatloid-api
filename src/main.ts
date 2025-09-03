@@ -49,8 +49,14 @@ async function bootstrap() {
     .getHttpAdapter()
     .getInstance()
     .addHook('onRequest', (req: any, reply: any, done: any) => {
-      req.startTime = Date.now();
-      requestLogger.http(`${req.method} ${req.originalUrl}`);
+      if (
+        !req.originalUrl.startsWith('/api') &&
+        !req.originalUrl.startsWith('/favicon')
+      ) {
+        req.startTime = Date.now();
+        requestLogger.http(`${req.method} ${req.originalUrl}`);
+      }
+
       done();
     });
 
@@ -58,12 +64,17 @@ async function bootstrap() {
     .getHttpAdapter()
     .getInstance()
     .addHook('onSend', (req: any, reply: any, payload: any, done: any) => {
-      const duration = Date.now() - req.startTime;
+      if (
+        !req.originalUrl.startsWith('/api') &&
+        !req.originalUrl.startsWith('/favicon')
+      ) {
+        const duration = Date.now() - req.startTime;
 
-      responseLogger.debug(`response body: `, payload);
-      responseLogger.http(
-        `${req.method} ${req.originalUrl} - ${reply.statusCode} ${STATUS_CODES[reply.statusCode]} - ${duration}ms`,
-      );
+        responseLogger.debug(`response body: `, payload);
+        responseLogger.http(
+          `${req.method} ${req.originalUrl} - ${reply.statusCode} ${STATUS_CODES[reply.statusCode]} - ${duration}ms`,
+        );
+      }
 
       done();
     });
