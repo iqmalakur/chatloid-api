@@ -1,17 +1,20 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
   Post,
+  Query,
+  Response,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { BaseController } from '../shared/base.controller';
 import { AuthService } from './auth.service';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply } from 'fastify';
 import { CLIENT_AUTHORIZED_URL } from 'src/configs/app.config';
 import {
   GoogleAuthCallbackParamDto,
@@ -28,17 +31,17 @@ export class AuthController extends BaseController {
 
   @Get('/google')
   @HttpCode(HttpStatus.FOUND)
-  public async googleLogin(reply: FastifyReply) {
+  public async googleLogin(@Response() reply: FastifyReply) {
     return reply.redirect(this.service.getAuthorizationUrl());
   }
 
   @Get('/google/callback')
   @HttpCode(HttpStatus.FOUND)
   public async googleAuthCallback(
-    request: FastifyRequest<{ Querystring: GoogleAuthCallbackParamDto }>,
-    reply: FastifyReply,
+    @Query() query: GoogleAuthCallbackParamDto,
+    @Response() reply: FastifyReply,
   ) {
-    const { code, error } = request.query;
+    const { code, error } = query;
 
     if (error) {
       return reply.redirect(
@@ -54,6 +57,8 @@ export class AuthController extends BaseController {
       const token = await this.service.handleGoogleAuthCallback(code);
       return reply.redirect(`${CLIENT_AUTHORIZED_URL}?token=${token}`);
     } catch (e) {
+      this.logger.error(e);
+
       let errorCode = 'server_error';
 
       if (e instanceof UnauthorizedException) {
@@ -73,9 +78,9 @@ export class AuthController extends BaseController {
   @Post('/google/verify')
   @HttpCode(HttpStatus.OK)
   public async verifyGoogleId(
-    request: FastifyRequest<{ Body: GoogleVerificationBodyDto }>,
+    @Body() body: GoogleVerificationBodyDto,
   ): Promise<GoogleAuthResBody> {
-    const { idToken } = request.body;
+    const { idToken } = body;
     const token = await this.service.handleVerifyGoogleId(idToken);
     return { token };
   }
