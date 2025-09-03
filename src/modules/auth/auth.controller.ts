@@ -32,7 +32,9 @@ export class AuthController extends BaseController {
   @Get('/google')
   @HttpCode(HttpStatus.FOUND)
   public async googleLogin(@Response() reply: FastifyReply) {
-    return reply.redirect(this.service.getAuthorizationUrl());
+    const url = this.service.getAuthorizationUrl();
+    this.logger.http(`redirect to ${url}`);
+    return reply.redirect(url);
   }
 
   @Get('/google/callback')
@@ -44,18 +46,16 @@ export class AuthController extends BaseController {
     const { code, error } = query;
 
     if (error) {
-      return reply.redirect(
-        `${CLIENT_AUTHORIZED_URL}?error=${encodeURIComponent(error)}`,
-      );
+      return reply.redirect(this.getRedirectUrl('error', error));
     }
 
     if (!code) {
-      return reply.redirect(`${CLIENT_AUTHORIZED_URL}?error=missing_code`);
+      return reply.redirect(this.getRedirectUrl('error', 'missing_code'));
     }
 
     try {
       const token = await this.service.handleGoogleAuthCallback(code);
-      return reply.redirect(`${CLIENT_AUTHORIZED_URL}?token=${token}`);
+      return reply.redirect(this.getRedirectUrl('token', token));
     } catch (e) {
       this.logger.error(e);
 
@@ -69,9 +69,7 @@ export class AuthController extends BaseController {
         errorCode = 'internal_error';
       }
 
-      return reply.redirect(
-        `${CLIENT_AUTHORIZED_URL}?error=${encodeURIComponent(errorCode)}`,
-      );
+      return reply.redirect(this.getRedirectUrl('error', errorCode));
     }
   }
 
@@ -83,5 +81,11 @@ export class AuthController extends BaseController {
     const { idToken } = body;
     const token = await this.service.handleVerifyGoogleId(idToken);
     return { token };
+  }
+
+  private getRedirectUrl(field: 'token' | 'error', value: string): string {
+    const url = `${CLIENT_AUTHORIZED_URL}?${field}=${encodeURIComponent(value)}`;
+    this.logger.http(`redirect to ${url}`);
+    return url;
   }
 }
