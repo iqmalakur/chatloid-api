@@ -70,7 +70,10 @@ async function bootstrap() {
       ) {
         const duration = Date.now() - req.startTime;
 
-        responseLogger.debug(`response body: `, payload);
+        if (reply.statusCode < 300 || reply.statusCode > 399) {
+          responseLogger.debug(`response body: `, payload);
+        }
+
         responseLogger.http(
           `${req.method} ${req.originalUrl} - ${reply.statusCode} ${STATUS_CODES[reply.statusCode]} - ${duration}ms`,
         );
