@@ -21,6 +21,11 @@ import {
   GoogleAuthResBody,
   GoogleVerificationBodyDto,
 } from './auth.dto';
+import {
+  ApiGoogleLogin,
+  ApiGoogleLoginCallback,
+  ApiGoogleVerify,
+} from 'src/decorators/api-auth.decorator';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -31,6 +36,7 @@ export class AuthController extends BaseController {
 
   @Get('/google')
   @HttpCode(HttpStatus.FOUND)
+  @ApiGoogleLogin()
   public async googleLogin(@Response() reply: FastifyReply) {
     const url = this.service.getAuthorizationUrl();
     this.logger.http(`redirect to ${url}`);
@@ -39,6 +45,7 @@ export class AuthController extends BaseController {
 
   @Get('/google/callback')
   @HttpCode(HttpStatus.FOUND)
+  @ApiGoogleLoginCallback()
   public async googleAuthCallback(
     @Query() query: GoogleAuthCallbackParamDto,
     @Response() reply: FastifyReply,
@@ -75,6 +82,7 @@ export class AuthController extends BaseController {
 
   @Post('/google/verify')
   @HttpCode(HttpStatus.OK)
+  @ApiGoogleVerify()
   public async verifyGoogleId(
     @Body() body: GoogleVerificationBodyDto,
   ): Promise<GoogleAuthResBody> {
