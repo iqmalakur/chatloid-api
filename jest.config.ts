@@ -12,6 +12,7 @@ const config: Config = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/$1',
+    '^generated/(.*)$': '<rootDir>/../generated/$1',
   },
 };
 
