@@ -4,7 +4,7 @@ import {
   ApiBadRequest,
   ApiServerError,
   ApiUnauthorized,
-} from './api-response.decorator';
+} from './response.api.decorator';
 import { ContactsResDto } from 'src/modules/contacts/contacts.dto';
 
 export const ApiGetContacts = (): MethodDecorator => {

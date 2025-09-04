@@ -4,7 +4,7 @@ import {
   ApiServerError,
   ApiUnauthorized,
   ApiUnprocessableEntity,
-} from './api-response.decorator';
+} from './response.api.decorator';
 import { GoogleVerificationBodyDto } from 'src/modules/auth/auth.dto';
 
 export const ApiGoogleLogin = (): MethodDecorator => {

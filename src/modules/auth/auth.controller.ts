@@ -25,7 +25,7 @@ import {
   ApiGoogleLogin,
   ApiGoogleLoginCallback,
   ApiGoogleVerify,
-} from 'src/decorators/api-auth.decorator';
+} from 'src/decorators/auth.api.decorator';
 
 @Controller('auth')
 @ApiTags('Auth')

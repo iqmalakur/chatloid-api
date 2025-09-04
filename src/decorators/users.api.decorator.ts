@@ -6,7 +6,7 @@ import {
   ApiNotFound,
   ApiServerError,
   ApiUnauthorized,
-} from './api-response.decorator';
+} from './response.api.decorator';
 
 export const ApiUserInfo = (): MethodDecorator => {
   return applyDecorators(
