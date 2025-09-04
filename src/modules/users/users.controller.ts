@@ -1,10 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { BaseController } from '../shared/base.controller';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { UserInfoResDto } from './users.dto';
-import { ApiUserInfo } from 'src/decorators/users.api.decorator';
+import { UserInfoResDto, UserUpdateReqDto } from './users.dto';
+import { ApiUserInfo, ApiUserUpdate } from 'src/decorators/users.api.decorator';
 
 @Controller('users')
 @ApiTags('Users')
@@ -20,5 +20,14 @@ export class UsersController extends BaseController {
     @CurrentUserId() userId: string,
   ): Promise<UserInfoResDto> {
     return this.service.handleUserInfo(userId);
+  }
+
+  @Patch('me')
+  @ApiUserUpdate()
+  public async UserUpdate(
+    @CurrentUserId() userId: string,
+    @Body() body: UserUpdateReqDto,
+  ): Promise<UserInfoResDto> {
+    return this.service.handleUserUpdate(userId, body);
   }
 }

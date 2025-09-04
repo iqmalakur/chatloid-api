@@ -25,3 +25,21 @@ export const ApiUserInfo = (): MethodDecorator => {
     ApiServerError(),
   );
 };
+
+export const ApiUserUpdate = (): MethodDecorator => {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Get authenticated user info',
+      description: 'Get authenticated user info from JWT',
+    }),
+    ApiResponse({
+      status: HttpStatus.OK,
+      description: 'Success get user info',
+      type: UserInfoResDto,
+    }),
+    ApiBadRequest('Token is not provided', 'Token is not provided'),
+    ApiUnauthorized('Token is not valid', 'Token is not valid'),
+    ApiNotFound('User is not found', 'User is not found'),
+    ApiServerError(),
+  );
+};

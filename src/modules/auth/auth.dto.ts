@@ -18,8 +18,8 @@ export class GoogleVerificationBodyDto {
     example:
       'eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2Z...dQsswA.eyJpc3MiOiJodHRwczovL2FjY...jAiwQ.QJ5o-9F...',
   })
-  @IsNotEmpty({ message: 'idToken harus diisi' })
-  @IsJWT({ message: 'idToken tidak valid' })
+  @IsNotEmpty()
+  @IsJWT()
   public readonly idToken: string;
 }
 
