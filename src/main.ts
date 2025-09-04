@@ -5,6 +5,7 @@ import { LoggerUtil } from './utils/logger.util';
 import { PORT } from './configs/app.config';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { STATUS_CODES } from 'http';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const logger = new LoggerUtil('Main');
@@ -12,6 +13,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, new FastifyAdapter());
   app.enableCors();
   logger.info('Loaded app modules');
+
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const swaggerConfig: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
     .setTitle('ChatLoid API')
