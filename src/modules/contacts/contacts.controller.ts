@@ -33,7 +33,7 @@ export class ContactsController extends BaseController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiGetContacts()
-  public async GetContacts(
+  public async getContacts(
     @CurrentUserId() userId: string,
     @Query() query: GetContactsParamDto,
   ): Promise<ContactsResDto[]> {
@@ -44,7 +44,7 @@ export class ContactsController extends BaseController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiAddContacts()
-  public async AddContacts(
+  public async addContacts(
     @CurrentUserId() userId: string,
     @Body() body: AddContactsReqDto,
   ): Promise<AddContactsResDto> {

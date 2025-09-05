@@ -24,7 +24,7 @@ export class UsersController extends BaseController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiUserInfo()
-  public async UserInfo(
+  public async getUserInfo(
     @CurrentUserId() userId: string,
   ): Promise<UserInfoResDto> {
     return this.service.handleUserInfo(userId);
@@ -33,7 +33,7 @@ export class UsersController extends BaseController {
   @Patch('me')
   @HttpCode(HttpStatus.OK)
   @ApiUserUpdate()
-  public async UserUpdate(
+  public async userUpdate(
     @CurrentUserId() userId: string,
     @Body() body: UserUpdateReqDto,
   ): Promise<UserInfoResDto> {
