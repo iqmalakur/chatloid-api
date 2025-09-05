@@ -8,12 +8,15 @@ import { ContactsModule } from './modules/contacts/contacts.module';
 import { ContactsController } from './modules/contacts/contacts.controller';
 import { ContactRequestsModule } from './modules/contact-requests/contact-requests.module';
 import { ContactRequestsController } from './modules/contact-requests/contact-requests.controller';
+import { ChatsModule } from './modules/chats/chats.module';
+import { ChatsController } from './modules/chats/chats.controller';
 
 @Module({
   imports: [
     AuthModule,
     ContactsModule,
     ContactRequestsModule,
+    ChatsModule,
     EventModule,
     UsersModule,
   ],
@@ -26,6 +29,7 @@ export class AppModule implements NestModule {
         UsersController,
         ContactsController,
         ContactRequestsController,
+        ChatsController,
       );
   }
 }
