@@ -9,6 +9,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { makeJwt } from './helper/makeJwt';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
@@ -48,9 +49,7 @@ describe('UsersController (e2e)', () => {
     existingUserId = user.id;
     userIds.push(user.id);
 
-    accessToken = jwt.sign({ sub: existingUserId }, SECRET_KEY, {
-      expiresIn: '1h',
-    });
+    accessToken = makeJwt(existingUserId);
   });
 
   afterAll(async () => {
@@ -80,13 +79,7 @@ describe('UsersController (e2e)', () => {
     });
 
     it('should return 404 if user not found', async () => {
-      const fakeToken = jwt.sign(
-        { sub: '550e8400-e29b-41d4-a716-446655440000' },
-        SECRET_KEY,
-        {
-          expiresIn: '1h',
-        },
-      );
+      const fakeToken = makeJwt('550e8400-e29b-41d4-a716-446655440000');
 
       await request(app.getHttpServer())
         .get('/users/me')
@@ -118,13 +111,7 @@ describe('UsersController (e2e)', () => {
     });
 
     it('should return 404 if user not found', async () => {
-      const fakeToken = jwt.sign(
-        { sub: '550e8400-e29b-41d4-a716-446655440000' },
-        SECRET_KEY,
-        {
-          expiresIn: '1h',
-        },
-      );
+      const fakeToken = makeJwt('550e8400-e29b-41d4-a716-446655440000');
 
       await request(app.getHttpServer())
         .patch('/users/me')
