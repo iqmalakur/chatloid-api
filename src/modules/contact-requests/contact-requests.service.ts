@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { BaseService } from '../shared/base.service';
 import { ContactRequestsRepository } from './contact-requests.repository';
@@ -32,7 +32,7 @@ export class ContactRequestsService extends BaseService {
     const userTwoId = userId;
 
     if (!(await this.repository.isContactRequestExists(userOneId, userTwoId))) {
-      throw new BadRequestException('Contact request not found');
+      throw new NotFoundException('Contact request not found');
     }
 
     const contactRequests = await this.repository.updateOrDeleteContactRequests(

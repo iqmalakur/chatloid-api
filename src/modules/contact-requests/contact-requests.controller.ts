@@ -17,6 +17,10 @@ import {
   ContactRequestsResDto,
   UpdateContactRequestsResDto,
 } from './contact-requests.dto';
+import {
+  ApiGetContactRequests,
+  ApiUpdateContactRequests,
+} from 'src/decorators/contact-request.api.decorator';
 
 @Controller('contact-requests')
 @ApiTags('Contact Requests')
@@ -28,6 +32,7 @@ export class ContactRequestsController extends BaseController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @ApiGetContactRequests()
   public async getContactRequests(
     @CurrentUserId() userId: string,
   ): Promise<ContactRequestsResDto[]> {
@@ -36,6 +41,7 @@ export class ContactRequestsController extends BaseController {
 
   @Patch(':targetId')
   @HttpCode(HttpStatus.OK)
+  @ApiUpdateContactRequests()
   public async updateContactRequests(
     @CurrentUserId() userId: string,
     @Param() param: ContactRequestsParamDto,
