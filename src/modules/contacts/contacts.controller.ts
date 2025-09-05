@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { BaseController } from '../shared/base.controller';
 import { ContactsService } from './contacts.service';
@@ -21,6 +29,7 @@ export class ContactsController extends BaseController {
 
   @Get()
   @ApiGetContacts()
+  @HttpCode(HttpStatus.OK)
   public async GetContacts(
     @CurrentUserId() userId: string,
     @Query() query: GetContactsParamDto,
@@ -30,6 +39,7 @@ export class ContactsController extends BaseController {
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   public async AddContacts(
     @CurrentUserId() userId: string,
     @Body() body: AddContactsReqDto,

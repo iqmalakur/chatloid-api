@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+} from '@nestjs/common';
 import { BaseController } from '../shared/base.controller';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -15,6 +22,7 @@ export class UsersController extends BaseController {
   }
 
   @Get('me')
+  @HttpCode(HttpStatus.OK)
   @ApiUserInfo()
   public async UserInfo(
     @CurrentUserId() userId: string,
@@ -23,6 +31,7 @@ export class UsersController extends BaseController {
   }
 
   @Patch('me')
+  @HttpCode(HttpStatus.OK)
   @ApiUserUpdate()
   public async UserUpdate(
     @CurrentUserId() userId: string,
