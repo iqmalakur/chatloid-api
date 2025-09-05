@@ -25,7 +25,7 @@ export class ContactRequestsRepository extends BaseRepository {
     userTwoId: string,
   ): Promise<boolean> {
     const result = await this.prisma.contact.count({
-      where: { userOneId, userTwoId },
+      where: { userOneId, userTwoId, isAccepted: false },
     });
     return result > 0;
   }
