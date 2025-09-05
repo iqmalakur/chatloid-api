@@ -16,6 +16,8 @@ describe('UsersController (e2e)', () => {
   let accessToken: string;
   let existingUserId: string;
 
+  const userIds: string[] = [];
+
   beforeAll(async () => {
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
@@ -42,7 +44,9 @@ describe('UsersController (e2e)', () => {
           'https://lh3.googleusercontent.com/a-/AOh14GhRkq9dXyZb12345=s96-c',
       },
     });
+
     existingUserId = user.id;
+    userIds.push(user.id);
 
     accessToken = jwt.sign({ sub: existingUserId }, SECRET_KEY, {
       expiresIn: '1h',
@@ -50,7 +54,11 @@ describe('UsersController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
+    await prisma.user.deleteMany({
+      where: {
+        OR: userIds.map((userId) => ({ id: userId })),
+      },
+    });
     await prisma.$disconnect();
     await app.close();
   });
@@ -126,7 +134,7 @@ describe('UsersController (e2e)', () => {
     });
 
     it('should return 409 if username already exists', async () => {
-      await prisma.user.create({
+      const jane = await prisma.user.create({
         data: {
           email: 'janedoe@gmail.com',
           username: 'janedoe',
@@ -136,6 +144,8 @@ describe('UsersController (e2e)', () => {
             'https://lh3.googleusercontent.com/a-/AOh14GhRkq9dXyZb54321=s96-c',
         },
       });
+
+      userIds.push(jane.id);
 
       await request(app.getHttpServer())
         .patch('/users/me')
