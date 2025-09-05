@@ -117,10 +117,10 @@ describe('ContactsController (e2e)', () => {
         .set('Authorization', `Bearer ${makeJwt(user.id)}`)
         .expect(200);
 
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body.length).toBe(2);
-      expect(response.body[0].name).toBe('User One');
-      expect(response.body[1].name).toBe('User Two');
+      expect(response.body.total).toBe(2);
+      expect(response.body.contacts).toBeInstanceOf(Array);
+      expect(response.body.contacts[0].name).toBe('User One');
+      expect(response.body.contacts[1].name).toBe('User Two');
     });
 
     it('should return filtered contacts', async () => {
@@ -130,8 +130,8 @@ describe('ContactsController (e2e)', () => {
         .set('Authorization', `Bearer ${makeJwt(user.id)}`)
         .expect(200);
 
-      expect(response.body).toHaveLength(1);
-      expect(response.body[0].name).toBe('User Two');
+      expect(response.body.total).toBe(1);
+      expect(response.body.contacts[0].name).toBe('User Two');
     });
   });
 

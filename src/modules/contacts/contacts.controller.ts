@@ -36,7 +36,7 @@ export class ContactsController extends BaseController {
   public async getContacts(
     @CurrentUserId() userId: string,
     @Query() query: GetContactsParamDto,
-  ): Promise<ContactsResDto[]> {
+  ): Promise<ContactsResDto> {
     const { search } = query;
     return this.service.handleGetContacts(userId, search);
   }

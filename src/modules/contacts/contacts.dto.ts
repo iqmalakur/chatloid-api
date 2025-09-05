@@ -7,7 +7,7 @@ export class GetContactsParamDto {
   public readonly search?: string;
 }
 
-export class ContactsResDto {
+export class ContactUser {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   public readonly id: string;
 
@@ -16,6 +16,14 @@ export class ContactsResDto {
 
   @ApiProperty({ example: 'https://lh3.googleusercontent.com/a-/AOh14Gj2...' })
   public readonly picture: string;
+}
+
+export class ContactsResDto {
+  @ApiProperty({ example: 2 })
+  public readonly total: number;
+
+  @ApiProperty({ isArray: true, type: ContactUser })
+  public readonly contacts: ContactUser[];
 }
 
 export class AddContactsReqDto {

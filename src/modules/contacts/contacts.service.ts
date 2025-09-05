@@ -18,15 +18,20 @@ export class ContactsService extends BaseService {
   public async handleGetContacts(
     userId: string,
     keyword?: string,
-  ): Promise<ContactsResDto[]> {
+  ): Promise<ContactsResDto> {
     const contacts = await this.repository.findUserContacts(
       userId,
       keyword ?? '',
     );
 
-    return contacts.map((contact) =>
+    const result = contacts.map((contact) =>
       contact.userOne.id === userId ? contact.userTwo : contact.userOne,
     );
+
+    return {
+      total: result.length,
+      contacts: result,
+    };
   }
 
   public async handleAddContacts(

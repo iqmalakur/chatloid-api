@@ -22,7 +22,6 @@ export const ApiGetContacts = (): MethodDecorator => {
       status: HttpStatus.OK,
       description: 'Success get user contacts',
       type: ContactsResDto,
-      isArray: true,
     }),
     ApiBadRequest('Token is not provided', 'Token is not provided'),
     ApiUnauthorized('Token is not valid', 'Token is not valid'),
