@@ -8,6 +8,7 @@ import {
 import { BaseService } from '../shared/base.service';
 import { ContactsRepository } from './contacts.repository';
 import { AddContactsResDto, ContactsResDto } from './contacts.dto';
+import { AddContactSelection } from './contacts.type';
 
 @Injectable()
 export class ContactsService extends BaseService {
@@ -45,26 +46,36 @@ export class ContactsService extends BaseService {
       user.id,
     );
 
-    if (userId === contactRequest?.userOneId && !contactRequest.isAccepted) {
+    if (
+      contactRequest &&
+      userId === contactRequest.userOneId &&
+      !contactRequest.isAccepted
+    ) {
       throw new ConflictException('Contact request already sent');
-    } else if (
-      userId === contactRequest?.userTwoId &&
+    }
+
+    if (
+      contactRequest &&
+      userId === contactRequest.userTwoId &&
       !contactRequest.isAccepted
     ) {
       const updateContact = await this.repository.acceptContact(
         user.id,
         userId,
       );
-
       if (!updateContact) throw new InternalServerErrorException();
+
       return {
         id: userId,
         username,
         accepted: updateContact.isAccepted,
       };
-    } else if (
-      userId === contactRequest?.userOneId ||
-      userId === contactRequest?.userTwoId
+    }
+
+    if (
+      contactRequest &&
+      (userId === contactRequest.userOneId ||
+        userId === contactRequest.userTwoId)
     ) {
       throw new ConflictException('Contact already added');
     }
