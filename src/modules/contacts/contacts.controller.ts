@@ -17,7 +17,10 @@ import {
   ContactsResDto,
   GetContactsParamDto,
 } from './contacts.dto';
-import { ApiGetContacts } from 'src/decorators/contacts.api.decorator';
+import {
+  ApiAddContacts,
+  ApiGetContacts,
+} from 'src/decorators/contacts.api.decorator';
 
 @Controller('contacts')
 @ApiTags('Contacts')
@@ -28,8 +31,8 @@ export class ContactsController extends BaseController {
   }
 
   @Get()
-  @ApiGetContacts()
   @HttpCode(HttpStatus.OK)
+  @ApiGetContacts()
   public async GetContacts(
     @CurrentUserId() userId: string,
     @Query() query: GetContactsParamDto,
@@ -40,6 +43,7 @@ export class ContactsController extends BaseController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiAddContacts()
   public async AddContacts(
     @CurrentUserId() userId: string,
     @Body() body: AddContactsReqDto,
