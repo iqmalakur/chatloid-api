@@ -37,7 +37,7 @@ export class ContactsService extends BaseService {
     if (!user) throw new NotFoundException('User not found');
 
     if (userId === user.id) {
-      throw new BadRequestException('Cannot add yourself as a contact');
+      throw new BadRequestException(['Cannot add yourself as a contact']);
     }
 
     const contactRequest = await this.repository.findCurrentContactRequest(
