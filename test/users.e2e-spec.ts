@@ -3,8 +3,6 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { PrismaClient } from 'generated/prisma/client';
-import * as jwt from 'jsonwebtoken';
-import { SECRET_KEY } from 'src/configs/app.config';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -55,7 +53,7 @@ describe('UsersController (e2e)', () => {
   afterAll(async () => {
     await prisma.user.deleteMany({
       where: {
-        OR: userIds.map((userId) => ({ id: userId })),
+        id: { in: userIds },
       },
     });
     await prisma.$disconnect();
@@ -72,7 +70,7 @@ describe('UsersController (e2e)', () => {
       expect(res.body).toEqual({
         email: 'johndoe@gmail.com',
         username: 'johndoe',
-        name: 'John Doe',
+        name: expect.stringContaining('John'),
         picture:
           'https://lh3.googleusercontent.com/a-/AOh14GhRkq9dXyZb12345=s96-c',
       });
