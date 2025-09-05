@@ -8,7 +8,6 @@ import {
 import { BaseService } from '../shared/base.service';
 import { ContactsRepository } from './contacts.repository';
 import { AddContactsResDto, ContactsResDto } from './contacts.dto';
-import { AddContactSelection } from './contacts.type';
 
 @Injectable()
 export class ContactsService extends BaseService {
