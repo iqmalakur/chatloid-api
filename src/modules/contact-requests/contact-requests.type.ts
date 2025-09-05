@@ -8,3 +8,13 @@ export type ContactRequestUserSelection = {
 export type ContactRequestSelection = {
   userOne: ContactRequestUserSelection;
 };
+
+export type UpdateContactRequestUserSelection = {
+  id: string;
+  username: string;
+};
+
+export type UpdateContactRequestSelection = {
+  userOne: UpdateContactRequestUserSelection;
+  isAccepted: boolean;
+};
