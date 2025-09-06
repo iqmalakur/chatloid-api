@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
 
 export class ChatRoomsQueryDto {
-  @ApiProperty({ example: 'Hello' })
+  @ApiProperty({ example: 'Hello', required: false })
   @IsOptional()
   public readonly search: string;
 }
@@ -27,10 +27,4 @@ export class ChatRoomResDto {
 
   @ApiProperty({ type: LastMessage })
   public readonly lastMessage: LastMessage | null;
-}
-
-export class ChatsResDto {
-  @ApiProperty({ example: 'Hello' })
-  @IsOptional()
-  public readonly search: string;
 }

@@ -4,6 +4,7 @@ import { BaseController } from '../shared/base.controller';
 import { ChatsService } from './chats.service';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import { ChatRoomResDto, ChatRoomsQueryDto } from './chats.dto';
+import { ApiGetChatRooms } from 'src/decorators/chats.api.decorator';
 
 @Controller('chats')
 @ApiTags('Chats')
@@ -15,6 +16,7 @@ export class ChatsController extends BaseController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @ApiGetChatRooms()
   public async getChatRooms(
     @CurrentUserId() userId: string,
     @Query() query: ChatRoomsQueryDto,
