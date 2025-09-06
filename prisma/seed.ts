@@ -57,29 +57,12 @@ async function main() {
     // --- Create Chat Room (Private between user1 and user2) ---
     const privateRoom = await tx.chatRoom.create({
       data: {
-        isGroup: false,
-        members: {
-          create: [{ userId: user1.id }, { userId: user2.id }],
-        },
+        user1Id: user1.id,
+        user2Id: user2.id,
       },
     });
 
-    // --- Create Group Chat ---
-    const groupRoom = await tx.chatRoom.create({
-      data: {
-        name: 'Friends Group',
-        isGroup: true,
-        picture: 'https://picsum.photos/300/300?random=4',
-        members: {
-          create: [
-            { userId: user1.id },
-            { userId: user2.id },
-            { userId: user3.id },
-          ],
-        },
-      },
-    });
-
+    const now = new Date();
     // --- Create Messages ---
     await tx.message.createMany({
       data: [
@@ -87,16 +70,19 @@ async function main() {
           chatRoomId: privateRoom.id,
           senderId: user1.id,
           content: 'Hey Jane, how are you?',
+          sentAt: now,
         },
         {
           chatRoomId: privateRoom.id,
           senderId: user2.id,
           content: 'I’m good John, thanks!',
+          sentAt: new Date(now.getTime() + 60000),
         },
         {
-          chatRoomId: groupRoom.id,
-          senderId: user3.id,
-          content: 'Hi everyone!',
+          chatRoomId: privateRoom.id,
+          senderId: user1.id,
+          content: 'Good day!',
+          sentAt: new Date(now.getTime() + 120000),
         },
       ],
     });

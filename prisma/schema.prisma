@@ -25,9 +25,10 @@ model User {
   updatedAt  DateTime     @db.Timestamp @updatedAt @map("updated_at")
 
   messages   Message[]
-  chatRooms  ChatMember[]
   contacts   Contact[]    @relation("ContactOwner")
   inContacts Contact[]    @relation("ContactTarget")
+  chatRooms1 ChatRoom[]   @relation("User1")
+  chatRooms2 ChatRoom[]   @relation("User2")
 }
 
 model Contact {
@@ -40,28 +41,20 @@ model Contact {
   userTwo    User     @relation("ContactTarget", fields: [userTwoId], references: [id])
 
   @@id([userOneId, userTwoId])
+  @@unique([userOneId, userTwoId])
 }
 
 model ChatRoom {
-  id        String       @id @db.Uuid @default(uuid())
-  name      String?      @db.VarChar(100)
-  isGroup   Boolean      @default(false) @map("is_group")
-  picture   String?      @db.VarChar(255)
-  createdAt DateTime     @db.Timestamp @default(now()) @map("created_at")
+  id        String    @id @db.Uuid @default(uuid())
+  user1Id   String    @db.Uuid @map("user1_id")
+  user2Id   String    @db.Uuid @map("user2_id")
+  createdAt DateTime  @db.Timestamp @default(now()) @map("created_at")
 
-  members   ChatMember[]
+  user1     User      @relation("User1", fields: [user1Id], references: [id])
+  user2     User      @relation("User2", fields: [user2Id], references: [id])
   messages  Message[]
-}
 
-model ChatMember {
-  chatRoomId String   @db.Uuid @map("chat_room_id")
-  userId     String   @db.Uuid @map("user_id")
-  joinedAt   DateTime @db.Timestamp @default(now()) @map("joined_at")
-
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
-
-  @@id([chatRoomId, userId])
+  @@unique([user1Id, user2Id])
 }
 
 model Message {
