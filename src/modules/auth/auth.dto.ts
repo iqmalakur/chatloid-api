@@ -4,11 +4,13 @@ import { IsJWT, IsNotEmpty, IsString } from 'class-validator';
 export class GoogleAuthCallbackParamDto {
   @ApiProperty({
     example: '4/P7q7W91a-oMsCeLvIaQm6bTrgtp7',
+    required: false,
   })
   public readonly code?: string;
 
   @ApiProperty({
     example: 'access_denied',
+    required: false,
   })
   public readonly error?: string;
 }

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class GetContactsParamDto {
-  @ApiProperty({ example: 'john' })
+  @ApiProperty({ example: 'john', required: false })
   @IsOptional()
   public readonly search?: string;
 }
