@@ -21,6 +21,7 @@ import {
   DetailChatRoomResDto,
 } from './chats.dto';
 import {
+  ApiDetailChatRoom,
   ApiGetChatRooms,
   ApiPostChatRoom,
 } from 'src/decorators/chats.api.decorator';
@@ -71,6 +72,7 @@ export class ChatsController extends BaseController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiDetailChatRoom()
   public async getDetailChatRoom(
     @CurrentUserId() userId: string,
     @Param() param: DetailChatRoomParamsDto,
