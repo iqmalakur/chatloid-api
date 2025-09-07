@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { BaseService } from '../shared/base.service';
 import { AuthRepository } from './auth.repository';
-import { google } from 'googleapis';
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
@@ -19,10 +18,11 @@ import {
 import { zeroPadding } from 'src/utils/common.util';
 import { sign } from 'jsonwebtoken';
 import { GoogleUser, UserSelection } from './auth.type';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService extends BaseService {
-  private readonly oauth2Client = new google.auth.OAuth2(
+  private readonly oauth2Client = new OAuth2Client(
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     `${BASE_URL}/auth/google/callback`,
@@ -51,12 +51,21 @@ export class AuthService extends BaseService {
     const { tokens } = await this.oauth2Client.getToken(code);
     this.oauth2Client.setCredentials(tokens);
 
-    const oauth2 = google.oauth2({
-      auth: this.oauth2Client,
-      version: 'v2',
+    const accessToken = tokens.access_token;
+    if (!accessToken) {
+      throw new InternalServerErrorException();
+    }
+
+    const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    const { data } = await oauth2.userinfo.get();
+    if (!res.ok) {
+      throw new InternalServerErrorException();
+    }
+
+    const data: GoogleUser = await res.json();
+    console.log(data);
     const user = await this.findOrCreateGoogleUser(data);
 
     return this.generateJwt(user);

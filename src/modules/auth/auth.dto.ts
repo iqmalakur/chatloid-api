@@ -1,17 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsJWT, IsNotEmpty, IsString } from 'class-validator';
+import { IsJWT, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class GoogleAuthCallbackParamDto {
   @ApiProperty({
     example: '4/P7q7W91a-oMsCeLvIaQm6bTrgtp7',
     required: false,
   })
+  @IsOptional()
   public readonly code?: string;
 
   @ApiProperty({
     example: 'access_denied',
     required: false,
   })
+  @IsOptional()
   public readonly error?: string;
 }
 

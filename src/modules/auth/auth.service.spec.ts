@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { sign } from 'jsonwebtoken';
-import { google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
 
 jest.mock('src/configs/google.config', () => ({
   GOOGLE_CLIENT_ID: 'mock-client-id',
@@ -23,13 +23,12 @@ jest.mock('jsonwebtoken', () => ({
   sign: jest.fn().mockReturnValue('mock-jwt'),
 }));
 
-jest.mock('googleapis');
+jest.mock('google-auth-library');
 
 describe('AuthService unit test', () => {
   const mockGetToken = jest.fn();
   const mockSetCredentials = jest.fn();
   const mockVerifyIdToken = jest.fn();
-  const mockUserInfoGet = jest.fn();
 
   let service: AuthService;
   let repository: jest.Mocked<AuthRepository>;
@@ -37,7 +36,7 @@ describe('AuthService unit test', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (google.auth.OAuth2 as any) = jest.fn().mockImplementation(() => ({
+    (OAuth2Client as any) = jest.fn().mockImplementation(() => ({
       getToken: mockGetToken,
       setCredentials: mockSetCredentials,
       verifyIdToken: mockVerifyIdToken,
@@ -46,9 +45,13 @@ describe('AuthService unit test', () => {
         .mockReturnValue('https://google.com/auth/example'),
     }));
 
-    google.oauth2 = jest.fn().mockReturnValue({
-      userinfo: { get: mockUserInfoGet },
-    });
+    global.fetch = jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({ id: '123', email: 'a@mail.com', name: 'Alice' }),
+      } as Response),
+    );
 
     repository = {
       findUserByGoogleId: jest.fn(),
@@ -69,10 +72,6 @@ describe('AuthService unit test', () => {
   describe('handleGoogleAuthCallback', () => {
     it('should return jwt token for valid code', async () => {
       mockGetToken.mockResolvedValue({ tokens: { access_token: 'token' } });
-
-      mockUserInfoGet.mockResolvedValue({
-        data: { id: '123', email: 'a@mail.com', name: 'Alice' },
-      });
 
       repository.findUserByGoogleId.mockResolvedValue({
         id: '1',
