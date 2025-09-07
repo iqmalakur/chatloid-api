@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   Response,
@@ -13,9 +14,11 @@ import { BaseController } from '../shared/base.controller';
 import { ChatsService } from './chats.service';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
 import {
+  DetailChatRoomParamsDto,
   ChatRoomResDto,
   ChatRoomsQueryDto,
   CreateChatRoomReqDto,
+  DetailChatRoomResDto,
 } from './chats.dto';
 import {
   ApiGetChatRooms,
@@ -64,5 +67,15 @@ export class ChatsController extends BaseController {
     return reply
       .status(HttpStatus.CREATED)
       .send(await this.service.handleCreateChatRooms(userId, contactId));
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  public async getDetailChatRoom(
+    @CurrentUserId() userId: string,
+    @Param() param: DetailChatRoomParamsDto,
+  ): Promise<DetailChatRoomResDto> {
+    const { id } = param;
+    return this.service.handleGetDetailChatRoom(userId, id);
   }
 }

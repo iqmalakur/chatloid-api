@@ -15,3 +15,18 @@ export type ChatRoomSelection = {
   user2: ChatRoomUserSelection;
   messages: LastMessageSelection[];
 };
+
+export type MessageSelection = {
+  id: string;
+  senderId: string;
+  content: string;
+  sentAt: Date;
+  editedAt: Date | null;
+};
+
+export type DetailChatRoomSelection = {
+  id: string;
+  user1: ChatRoomUserSelection;
+  user2: ChatRoomUserSelection;
+  messages: MessageSelection[];
+};

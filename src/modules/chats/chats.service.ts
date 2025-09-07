@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { BaseService } from '../shared/base.service';
 import { ChatsRepository } from './chats.repository';
-import { ChatRoomResDto } from './chats.dto';
+import { ChatRoomResDto, DetailChatRoomResDto } from './chats.dto';
 
 @Injectable()
 export class ChatsService extends BaseService {
@@ -101,6 +101,34 @@ export class ChatsService extends BaseService {
       picture: userContact.picture,
       displayName: userContact.name,
       lastMessage,
+    };
+  }
+
+  public async handleGetDetailChatRoom(
+    userId: string,
+    chatRoomId: string,
+  ): Promise<DetailChatRoomResDto> {
+    const chatRoom = await this.repository.findChatRoomById(userId, chatRoomId);
+
+    if (!chatRoom) {
+      throw new NotFoundException('Chat room not found!');
+    }
+
+    const userContact =
+      userId === chatRoom.user1.id ? chatRoom.user2 : chatRoom.user1;
+
+    return {
+      id: chatRoom.id,
+      displayName: userContact.name,
+      picture: userContact.picture,
+      status: 'offline',
+      chats: chatRoom.messages.map((message) => ({
+        id: message.id,
+        content: message.content,
+        createdAt: message.sentAt,
+        isEdited: message.editedAt != null,
+        sender: message.senderId,
+      })),
     };
   }
 }
