@@ -17,7 +17,10 @@ import {
   ChatRoomsQueryDto,
   CreateChatRoomReqDto,
 } from './chats.dto';
-import { ApiGetChatRooms } from 'src/decorators/chats.api.decorator';
+import {
+  ApiGetChatRooms,
+  ApiPostChatRoom,
+} from 'src/decorators/chats.api.decorator';
 import type { FastifyReply } from 'fastify';
 
 @Controller('chats')
@@ -41,6 +44,7 @@ export class ChatsController extends BaseController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiPostChatRoom()
   public async createChatRoom(
     @CurrentUserId() userId: string,
     @Body() body: CreateChatRoomReqDto,
