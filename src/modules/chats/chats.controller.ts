@@ -1,10 +1,24 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  Response,
+} from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { BaseController } from '../shared/base.controller';
 import { ChatsService } from './chats.service';
 import { CurrentUserId } from 'src/decorators/current-user-id.decorator';
-import { ChatRoomResDto, ChatRoomsQueryDto } from './chats.dto';
+import {
+  ChatRoomResDto,
+  ChatRoomsQueryDto,
+  CreateChatRoomReqDto,
+} from './chats.dto';
 import { ApiGetChatRooms } from 'src/decorators/chats.api.decorator';
+import type { FastifyReply } from 'fastify';
 
 @Controller('chats')
 @ApiTags('Chats')
@@ -23,5 +37,28 @@ export class ChatsController extends BaseController {
   ): Promise<ChatRoomResDto[]> {
     const { search } = query;
     return this.service.handleGetChatRooms(userId, search);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  public async createChatRoom(
+    @CurrentUserId() userId: string,
+    @Body() body: CreateChatRoomReqDto,
+    @Response() reply: FastifyReply,
+  ): Promise<ChatRoomResDto> {
+    const { contactId } = body;
+
+    const existingChatRoom = await this.service.handleCheckExistingChatRoom(
+      userId,
+      contactId,
+    );
+
+    if (existingChatRoom) {
+      return reply.status(HttpStatus.OK).send(existingChatRoom);
+    }
+
+    return reply
+      .status(HttpStatus.CREATED)
+      .send(await this.service.handleCreateChatRooms(userId, contactId));
   }
 }

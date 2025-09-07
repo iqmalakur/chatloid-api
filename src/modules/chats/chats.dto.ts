@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsUUID } from 'class-validator';
 
 export class ChatRoomsQueryDto {
   @ApiProperty({ example: 'Hello', required: false })
@@ -27,4 +27,10 @@ export class ChatRoomResDto {
 
   @ApiProperty({ type: LastMessage })
   public readonly lastMessage: LastMessage | null;
+}
+
+export class CreateChatRoomReqDto {
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
+  @IsUUID()
+  public readonly contactId: string;
 }

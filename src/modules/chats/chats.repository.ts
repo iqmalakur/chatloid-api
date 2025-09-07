@@ -32,4 +32,52 @@ export class ChatsRepository extends BaseRepository {
       },
     });
   }
+
+  public async findExistingChatRoom(
+    userId: string,
+    contactId: string,
+  ): Promise<ChatRoomSelection | null> {
+    return this.prisma.chatRoom.findFirst({
+      where: {
+        OR: [
+          { user1Id: userId, user2Id: contactId },
+          { user1Id: contactId, user2Id: userId },
+        ],
+      },
+      select: {
+        id: true,
+        user1: { select: { id: true, name: true, picture: true } },
+        user2: { select: { id: true, name: true, picture: true } },
+        messages: {
+          select: { content: true, sentAt: true },
+          take: 1,
+          orderBy: { sentAt: 'desc' },
+        },
+      },
+    });
+  }
+
+  public async isUserExists(userId: string): Promise<boolean> {
+    const result = await this.prisma.user.count({ where: { id: userId } });
+    return result > 0;
+  }
+
+  public async createChatRoom(
+    user1Id: string,
+    user2Id: string,
+  ): Promise<ChatRoomSelection | null> {
+    return this.prisma.chatRoom.create({
+      data: { user1Id, user2Id },
+      select: {
+        id: true,
+        user1: { select: { id: true, name: true, picture: true } },
+        user2: { select: { id: true, name: true, picture: true } },
+        messages: {
+          select: { content: true, sentAt: true },
+          take: 1,
+          orderBy: { sentAt: 'desc' },
+        },
+      },
+    });
+  }
 }
