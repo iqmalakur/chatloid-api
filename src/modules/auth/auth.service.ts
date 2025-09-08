@@ -65,7 +65,6 @@ export class AuthService extends BaseService {
     }
 
     const data: GoogleUser = await res.json();
-    console.log(data);
     const user = await this.findOrCreateGoogleUser(data);
 
     return this.generateJwt(user);
