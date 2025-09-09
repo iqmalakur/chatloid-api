@@ -49,6 +49,8 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userId,
         status: 'Online',
       });
+
+      this.logger.debug(`${userId} connected`);
     } else {
       return client.disconnect(true);
     }
@@ -62,6 +64,8 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
       userId,
       status: 'Offline',
     });
+
+    this.logger.debug(`${userId} disconnected`);
   }
 
   @SubscribeMessage('send_message')
