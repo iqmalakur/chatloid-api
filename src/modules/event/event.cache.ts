@@ -13,10 +13,6 @@ export class EventCache {
     this.users.delete(userId);
   }
 
-  public isUserOnline(userId: string): boolean {
-    return this.users.has(userId);
-  }
-
   public getUserSocket(userId: string): AuthSocket | undefined {
     return this.users.get(userId);
   }

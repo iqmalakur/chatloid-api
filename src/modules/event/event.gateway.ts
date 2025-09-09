@@ -45,13 +45,24 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (userId) {
       client.data.userId = userId;
       this.cache.addUser(userId, client);
+
+      this.server.emit('user_status', {
+        userId,
+        status: 'Online',
+      });
     } else {
       return client.disconnect(true);
     }
   }
 
   public async handleDisconnect(client: AuthSocket) {
-    this.cache.removeUser(client.data.userId);
+    const userId = client.data.userId;
+    this.cache.removeUser(userId);
+
+    this.server.emit('user_status', {
+      userId,
+      status: 'Offline',
+    });
   }
 
   @SubscribeMessage('events')
