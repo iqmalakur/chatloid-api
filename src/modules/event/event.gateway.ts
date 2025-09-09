@@ -1,21 +1,20 @@
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from '@nestjs/websockets';
 import { verify } from 'jsonwebtoken';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
 import { SECRET_KEY } from 'src/configs/app.config';
 import { LoggerUtil } from 'src/utils/logger.util';
-import { AuthSocket } from './event.type';
+import type { AuthSocket } from './event.type';
 import { EventService } from './event.service';
 import { EventCache } from './event.cache';
+import { SendMessageDto } from './event.dto';
 
 @WebSocketGateway({
   cors: {
@@ -65,17 +64,30 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @SubscribeMessage('events')
-  findAll(@MessageBody() data: any): Observable<WsResponse<number>> {
-    this.logger.debug('data dari client: ', data);
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: 'events', data: item })),
-    );
-  }
+  @SubscribeMessage('send_message')
+  public async sendMessage(
+    @MessageBody() message: SendMessageDto,
+    @ConnectedSocket() client: AuthSocket,
+  ) {
+    const senderId = client.data.userId;
 
-  @SubscribeMessage('identity')
-  async identity(@MessageBody() data: number): Promise<number> {
-    return data;
+    try {
+      const newMessage = await this.service.handleSendMessage(
+        message.chatRoomId,
+        senderId,
+        message.content,
+      );
+
+      client.emit('new_message', newMessage);
+
+      const receiverSocket = this.cache.getUserSocket(newMessage.receiverId);
+      if (receiverSocket) {
+        receiverSocket.emit('new_message', newMessage);
+      }
+    } catch (e) {
+      const error = e as Error;
+      client.emit('error', error.message);
+    }
   }
 
   private verifyToken(token: string): string | null {
