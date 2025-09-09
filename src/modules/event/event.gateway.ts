@@ -15,6 +15,7 @@ import { SECRET_KEY } from 'src/configs/app.config';
 import { LoggerUtil } from 'src/utils/logger.util';
 import { AuthSocket } from './event.type';
 import { EventService } from './event.service';
+import { EventCache } from './event.cache';
 
 @WebSocketGateway({
   cors: {
@@ -27,7 +28,10 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private readonly server: Server;
 
-  public constructor(private readonly service: EventService) {
+  public constructor(
+    private readonly cache: EventCache,
+    private readonly service: EventService,
+  ) {
     this.logger = new LoggerUtil(this.constructor.name);
   }
 
@@ -37,19 +41,17 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return client.disconnect(true);
     }
 
-    try {
-      const jwt = token.split(' ')[1];
-      const userId = verify(jwt, SECRET_KEY).sub as string;
+    const userId = this.verifyToken(token);
+    if (userId) {
       client.data.userId = userId;
-      this.logger.debug('Authorized. Client ID : ', userId);
-    } catch (err) {
-      this.logger.debug('Unauthorized. Invalid Token');
+      this.cache.addUser(userId, client);
+    } else {
       return client.disconnect(true);
     }
   }
 
   public async handleDisconnect(client: AuthSocket) {
-    // throw new Error('Method not implemented.');
+    this.cache.removeUser(client.data.userId);
   }
 
   @SubscribeMessage('events')
@@ -63,5 +65,13 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('identity')
   async identity(@MessageBody() data: number): Promise<number> {
     return data;
+  }
+
+  private verifyToken(token: string): string | null {
+    try {
+      return verify(token, SECRET_KEY).sub as string;
+    } catch (err) {
+      return null;
+    }
   }
 }
