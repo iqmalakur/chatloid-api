@@ -8,6 +8,10 @@ export class EditMessageDto {
   public readonly content: string;
 }
 
+export class DeleteMessageDto {
+  public readonly id: string;
+}
+
 export class NewMessageDto {
   public readonly id: string;
   public readonly chatRoomId: string;

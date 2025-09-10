@@ -67,4 +67,25 @@ export class EventRepository extends BaseRepository {
       },
     });
   }
+
+  public async deleteMessage(id: string): Promise<NewMessageSelection | null> {
+    return this.prisma.message.delete({
+      where: { id },
+      select: {
+        id: true,
+        senderId: true,
+        content: true,
+        sentAt: true,
+        editedAt: true,
+        deletedAt: true,
+        chatRoom: {
+          select: {
+            id: true,
+            user1Id: true,
+            user2Id: true,
+          },
+        },
+      },
+    });
+  }
 }
