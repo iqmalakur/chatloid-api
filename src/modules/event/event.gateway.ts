@@ -14,7 +14,12 @@ import { LoggerUtil } from 'src/utils/logger.util';
 import type { AuthSocket } from './event.type';
 import { EventService } from './event.service';
 import { EventCache } from './event.cache';
-import { DeleteMessageDto, EditMessageDto, SendMessageDto } from './event.dto';
+import {
+  DeleteMessageDto,
+  EditMessageDto,
+  NewMessageDto,
+  SendMessageDto,
+} from './event.dto';
 
 @WebSocketGateway({
   cors: {
@@ -73,25 +78,13 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: SendMessageDto,
     @ConnectedSocket() client: AuthSocket,
   ) {
-    const senderId = client.data.userId;
-
-    try {
-      const newMessage = await this.service.handleSendMessage(
+    return this.handleResponse(client, () =>
+      this.service.handleSendMessage(
         message.chatRoomId,
-        senderId,
+        client.data.userId,
         message.content,
-      );
-
-      client.emit('new_message', newMessage);
-
-      const receiverSocket = this.cache.getUserSocket(newMessage.receiverId);
-      if (receiverSocket) {
-        receiverSocket.emit('new_message', newMessage);
-      }
-    } catch (e) {
-      const error = e as Error;
-      client.emit('error', error.message);
-    }
+      ),
+    );
   }
 
   @SubscribeMessage('edit_message')
@@ -99,25 +92,13 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: EditMessageDto,
     @ConnectedSocket() client: AuthSocket,
   ) {
-    const senderId = client.data.userId;
-
-    try {
-      const newMessage = await this.service.handleEditMessage(
+    return this.handleResponse(client, () =>
+      this.service.handleEditMessage(
         message.id,
-        senderId,
+        client.data.userId,
         message.content,
-      );
-
-      client.emit('new_message', newMessage);
-
-      const receiverSocket = this.cache.getUserSocket(newMessage.receiverId);
-      if (receiverSocket) {
-        receiverSocket.emit('new_message', newMessage);
-      }
-    } catch (e) {
-      const error = e as Error;
-      client.emit('error', error.message);
-    }
+      ),
+    );
   }
 
   @SubscribeMessage('delete_message')
@@ -125,13 +106,17 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: DeleteMessageDto,
     @ConnectedSocket() client: AuthSocket,
   ) {
-    const senderId = client.data.userId;
+    return this.handleResponse(client, () =>
+      this.service.handleDeleteMessage(message.id, client.data.userId),
+    );
+  }
 
+  private async handleResponse(
+    client: AuthSocket,
+    callService: () => Promise<NewMessageDto>,
+  ) {
     try {
-      const newMessage = await this.service.handleDeleteMessage(
-        message.id,
-        senderId,
-      );
+      const newMessage = await callService();
 
       client.emit('new_message', newMessage);
 

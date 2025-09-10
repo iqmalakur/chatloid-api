@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseService } from '../shared/base.service';
 import { EventRepository } from './event.repository';
 import { NewMessageDto } from './event.dto';
+import { NewMessageSelection } from './event.type';
 
 @Injectable()
 export class EventService extends BaseService {
@@ -24,21 +25,7 @@ export class EventService extends BaseService {
       throw new Error('Failed to send message');
     }
 
-    const receiverId =
-      senderId === message.chatRoom.user1Id
-        ? message.chatRoom.user2Id
-        : message.chatRoom.user1Id;
-
-    return {
-      id: message.id,
-      chatRoomId: message.chatRoom.id,
-      senderId: message.senderId,
-      receiverId,
-      content: message.content,
-      timestamp: message.sentAt,
-      isEdited: message.editedAt != null,
-      isDeleted: message.deletedAt != null,
-    };
+    return this.buildNewMessageDto(message);
   }
 
   public async handleEditMessage(
@@ -56,21 +43,7 @@ export class EventService extends BaseService {
       throw new Error('Failed to edit message');
     }
 
-    const receiverId =
-      message.senderId === message.chatRoom.user1Id
-        ? message.chatRoom.user2Id
-        : message.chatRoom.user1Id;
-
-    return {
-      id: message.id,
-      chatRoomId: message.chatRoom.id,
-      senderId: message.senderId,
-      receiverId,
-      content: message.content,
-      timestamp: message.sentAt,
-      isEdited: message.editedAt != null,
-      isDeleted: message.deletedAt != null,
-    };
+    return this.buildNewMessageDto(message);
   }
 
   public async handleDeleteMessage(
@@ -87,6 +60,10 @@ export class EventService extends BaseService {
       throw new Error('Failed to delete message');
     }
 
+    return this.buildNewMessageDto(message);
+  }
+
+  private buildNewMessageDto(message: NewMessageSelection): NewMessageDto {
     const receiverId =
       message.senderId === message.chatRoom.user1Id
         ? message.chatRoom.user2Id
