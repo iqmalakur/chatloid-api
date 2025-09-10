@@ -42,6 +42,7 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
   public async handleConnection(client: AuthSocket) {
     const token: string = client.handshake.auth?.token;
     if (!token) {
+      client.emit('error', 'Token is not provided');
       return client.disconnect(true);
     }
 
@@ -57,6 +58,7 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.logger.debug(`${userId} connected`);
     } else {
+      client.emit('error', 'Invalid token');
       return client.disconnect(true);
     }
   }
