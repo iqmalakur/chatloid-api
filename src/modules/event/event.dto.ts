@@ -3,6 +3,11 @@ export class SendMessageDto {
   public readonly content: string;
 }
 
+export class EditMessageDto {
+  public readonly id: string;
+  public readonly content: string;
+}
+
 export class NewMessageDto {
   public readonly id: string;
   public readonly chatRoomId: string;

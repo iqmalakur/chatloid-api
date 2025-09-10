@@ -14,7 +14,7 @@ import { LoggerUtil } from 'src/utils/logger.util';
 import type { AuthSocket } from './event.type';
 import { EventService } from './event.service';
 import { EventCache } from './event.cache';
-import { SendMessageDto } from './event.dto';
+import { EditMessageDto, SendMessageDto } from './event.dto';
 
 @WebSocketGateway({
   cors: {
@@ -78,6 +78,32 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const newMessage = await this.service.handleSendMessage(
         message.chatRoomId,
+        senderId,
+        message.content,
+      );
+
+      client.emit('new_message', newMessage);
+
+      const receiverSocket = this.cache.getUserSocket(newMessage.receiverId);
+      if (receiverSocket) {
+        receiverSocket.emit('new_message', newMessage);
+      }
+    } catch (e) {
+      const error = e as Error;
+      client.emit('error', error.message);
+    }
+  }
+
+  @SubscribeMessage('edit_message')
+  public async editMessage(
+    @MessageBody() message: EditMessageDto,
+    @ConnectedSocket() client: AuthSocket,
+  ) {
+    const senderId = client.data.userId;
+
+    try {
+      const newMessage = await this.service.handleEditMessage(
+        message.id,
         senderId,
         message.content,
       );

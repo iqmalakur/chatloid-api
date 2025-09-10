@@ -40,4 +40,36 @@ export class EventService extends BaseService {
       isDeleted: message.deletedAt != null,
     };
   }
+
+  public async handleEditMessage(
+    messageId: string,
+    senderId: string,
+    content: string,
+  ): Promise<NewMessageDto> {
+    if (!(await this.repository.isMessageBelongsToUser(messageId, senderId))) {
+      throw new Error('Cannot edit message');
+    }
+
+    const message = await this.repository.updateMessage(messageId, content);
+
+    if (!message) {
+      throw new Error('Failed to edit message');
+    }
+
+    const receiverId =
+      message.senderId === message.chatRoom.user1Id
+        ? message.chatRoom.user2Id
+        : message.chatRoom.user1Id;
+
+    return {
+      id: message.id,
+      chatRoomId: message.chatRoom.id,
+      senderId: message.senderId,
+      receiverId,
+      content: message.content,
+      timestamp: message.sentAt,
+      isEdited: message.editedAt != null,
+      isDeleted: message.deletedAt != null,
+    };
+  }
 }
