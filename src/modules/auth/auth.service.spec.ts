@@ -64,7 +64,9 @@ describe('AuthService unit test', () => {
 
   describe('getAuthorizationUrl', () => {
     it('should return an URL', () => {
-      const url = service.getAuthorizationUrl();
+      const url = service.getAuthorizationUrl(
+        'http://localhost:3001/api/auth/callback',
+      );
       expect(url).toBe('https://google.com/auth/example');
     });
   });
@@ -77,9 +79,14 @@ describe('AuthService unit test', () => {
         id: '1',
       });
 
-      const jwt = await service.handleGoogleAuthCallback('code');
+      const redirectUrl = await service.handleGoogleAuthCallback(
+        'code',
+        'http://localhost:3001/auth/callback',
+      );
 
-      expect(jwt).toBe('mock-jwt');
+      expect(redirectUrl).toBe(
+        'http://localhost:3001/auth/callback?token=mock-jwt',
+      );
       expect(sign).toHaveBeenCalledWith({ sub: '1' }, 'mock-secret', {
         expiresIn: '1w',
       });
