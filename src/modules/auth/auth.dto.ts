@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsJWT, IsNotEmpty, IsOptional } from 'class-validator';
 
-export class GoogleAuthCallbackParamDto {
+export class GoogleAuthQueryDto {
+  @ApiProperty({
+    example: 'https://example.com/',
+    required: true,
+  })
+  @IsNotEmpty()
+  public readonly redirect_to: string;
+}
+
+export class GoogleAuthCallbackQueryDto {
   @ApiProperty({
     example: '4/P7q7W91a-oMsCeLvIaQm6bTrgtp7',
     required: false,
@@ -15,6 +24,14 @@ export class GoogleAuthCallbackParamDto {
   })
   @IsOptional()
   public readonly error?: string;
+
+  @ApiProperty({
+    example:
+      'eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2Z...dQsswA.eyJpc3MiOiJodHRwczovL2FjY...jAiwQ.QJ5o-9F...',
+  })
+  @IsNotEmpty()
+  @IsJWT()
+  public readonly state: string;
 }
 
 export class GoogleVerificationBodyDto {

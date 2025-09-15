@@ -16,7 +16,7 @@ import {
   SECRET_KEY,
 } from 'src/configs/app.config';
 import { zeroPadding } from 'src/utils/common.util';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { GoogleUser, UserSelection } from './auth.type';
 import { OAuth2Client } from 'google-auth-library';
 
@@ -33,21 +33,30 @@ export class AuthService extends BaseService {
     'https://www.googleapis.com/auth/userinfo.profile',
   ];
 
-  private readonly authorizationUrl = this.oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: this.authorizedScopes,
-    include_granted_scopes: true,
-  });
-
   public constructor(private readonly repository: AuthRepository) {
     super();
   }
 
-  public getAuthorizationUrl(): string {
-    return this.authorizationUrl;
+  public getAuthorizationUrl(redirectUrl: string): string {
+    const state = sign({ redirectUrl }, SECRET_KEY, { expiresIn: '5m' });
+    return this.oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: this.authorizedScopes,
+      include_granted_scopes: true,
+      state,
+    });
   }
 
-  public async handleGoogleAuthCallback(code: string): Promise<string> {
+  public async handleGoogleAuthCallback(
+    code: string,
+    state: string,
+  ): Promise<string> {
+    const redirectUrl = (verify(state, SECRET_KEY) as any)?.redirectUrl;
+
+    if (!redirectUrl) {
+      throw new UnauthorizedException('invalid token');
+    }
+
     const { tokens } = await this.oauth2Client.getToken(code);
     this.oauth2Client.setCredentials(tokens);
 
@@ -66,8 +75,9 @@ export class AuthService extends BaseService {
 
     const data: GoogleUser = await res.json();
     const user = await this.findOrCreateGoogleUser(data);
+    const jwt = this.generateJwt(user);
 
-    return this.generateJwt(user);
+    return `${redirectUrl}?token=${jwt}`;
   }
 
   public async handleVerifyGoogleId(idToken: string): Promise<string> {

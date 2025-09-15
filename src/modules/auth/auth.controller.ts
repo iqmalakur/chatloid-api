@@ -17,7 +17,8 @@ import { AuthService } from './auth.service';
 import type { FastifyReply } from 'fastify';
 import { CLIENT_AUTHORIZED_URL } from 'src/configs/app.config';
 import {
-  GoogleAuthCallbackParamDto,
+  GoogleAuthCallbackQueryDto,
+  GoogleAuthQueryDto,
   GoogleAuthResBody,
   GoogleVerificationBodyDto,
 } from './auth.dto';
@@ -37,9 +38,12 @@ export class AuthController extends BaseController {
   @Get('/google')
   @HttpCode(HttpStatus.FOUND)
   @ApiGoogleLogin()
-  public async googleLogin(@Response() reply: FastifyReply) {
-    const url = this.service.getAuthorizationUrl();
-    this.logger.http(`redirect to ${url}`);
+  public googleLogin(
+    @Query() query: GoogleAuthQueryDto,
+    @Response() reply: FastifyReply,
+  ) {
+    const { redirect_to } = query;
+    const url = this.service.getAuthorizationUrl(redirect_to);
     return reply.redirect(url);
   }
 
@@ -47,22 +51,22 @@ export class AuthController extends BaseController {
   @HttpCode(HttpStatus.FOUND)
   @ApiGoogleLoginCallback()
   public async googleAuthCallback(
-    @Query() query: GoogleAuthCallbackParamDto,
+    @Query() query: GoogleAuthCallbackQueryDto,
     @Response() reply: FastifyReply,
   ) {
-    const { code, error } = query;
+    const { code, error, state } = query;
 
     if (error) {
-      return reply.redirect(this.getRedirectUrl('error', error));
+      return reply.redirect(this.getErrorRedirectUrl(error));
     }
 
     if (!code) {
-      return reply.redirect(this.getRedirectUrl('error', 'missing_code'));
+      return reply.redirect(this.getErrorRedirectUrl('missing_code'));
     }
 
     try {
-      const token = await this.service.handleGoogleAuthCallback(code);
-      return reply.redirect(this.getRedirectUrl('token', token));
+      const url = await this.service.handleGoogleAuthCallback(code, state);
+      return reply.redirect(url);
     } catch (e) {
       this.logger.error(e);
 
@@ -76,7 +80,7 @@ export class AuthController extends BaseController {
         errorCode = 'internal_error';
       }
 
-      return reply.redirect(this.getRedirectUrl('error', errorCode));
+      return reply.redirect(this.getErrorRedirectUrl(errorCode));
     }
   }
 
@@ -91,8 +95,8 @@ export class AuthController extends BaseController {
     return { token };
   }
 
-  private getRedirectUrl(field: 'token' | 'error', value: string): string {
-    const url = `${CLIENT_AUTHORIZED_URL}?${field}=${encodeURIComponent(value)}`;
+  private getErrorRedirectUrl(value: string): string {
+    const url = `${CLIENT_AUTHORIZED_URL}?error=${encodeURIComponent(value)}`;
     this.logger.http(`redirect to ${url}`);
     return url;
   }
