@@ -25,7 +25,6 @@ COPY --from=builder /app/package.json ./package.json
 
 ENV PORT=3000
 ENV BASE_URL=http://localhost:3000
-ENV CLIENT_AUTHORIZED_URL=http://localhost:3001/login
 ENV DEFAULT_PICTURE_URL=http://localhost:3000/public/images/defaultuser.jpg
 
 ENV LOGGER_TRANSPORT=console

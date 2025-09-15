@@ -47,12 +47,14 @@ export class AuthService extends BaseService {
     });
   }
 
+  public verifyState(state: string): string | undefined {
+    return (verify(state, SECRET_KEY) as any)?.redirectUrl;
+  }
+
   public async handleGoogleAuthCallback(
     code: string,
-    state: string,
+    redirectUrl: string,
   ): Promise<string> {
-    const redirectUrl = (verify(state, SECRET_KEY) as any)?.redirectUrl;
-
     if (!redirectUrl) {
       throw new UnauthorizedException('invalid token');
     }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -15,7 +16,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { BaseController } from '../shared/base.controller';
 import { AuthService } from './auth.service';
 import type { FastifyReply } from 'fastify';
-import { CLIENT_AUTHORIZED_URL } from 'src/configs/app.config';
 import {
   GoogleAuthCallbackQueryDto,
   GoogleAuthQueryDto,
@@ -55,17 +55,27 @@ export class AuthController extends BaseController {
     @Response() reply: FastifyReply,
   ) {
     const { code, error, state } = query;
+    const redirectUrl = this.service.verifyState(state);
+
+    if (!redirectUrl) {
+      throw new BadRequestException(['invalid request']);
+    }
 
     if (error) {
-      return reply.redirect(this.getErrorRedirectUrl(error));
+      return reply.redirect(this.getErrorRedirectUrl(redirectUrl, error));
     }
 
     if (!code) {
-      return reply.redirect(this.getErrorRedirectUrl('missing_code'));
+      return reply.redirect(
+        this.getErrorRedirectUrl(redirectUrl, 'missing_code'),
+      );
     }
 
     try {
-      const url = await this.service.handleGoogleAuthCallback(code, state);
+      const url = await this.service.handleGoogleAuthCallback(
+        code,
+        redirectUrl,
+      );
       return reply.redirect(url);
     } catch (e) {
       this.logger.error(e);
@@ -80,7 +90,7 @@ export class AuthController extends BaseController {
         errorCode = 'internal_error';
       }
 
-      return reply.redirect(this.getErrorRedirectUrl(errorCode));
+      return reply.redirect(this.getErrorRedirectUrl(redirectUrl, errorCode));
     }
   }
 
@@ -95,9 +105,8 @@ export class AuthController extends BaseController {
     return { token };
   }
 
-  private getErrorRedirectUrl(value: string): string {
-    const url = `${CLIENT_AUTHORIZED_URL}?error=${encodeURIComponent(value)}`;
-    this.logger.http(`redirect to ${url}`);
+  private getErrorRedirectUrl(clientUrl: string, value: string): string {
+    const url = `${clientUrl}?error=${encodeURIComponent(value)}`;
     return url;
   }
 }
