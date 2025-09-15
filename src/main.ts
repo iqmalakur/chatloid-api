@@ -48,42 +48,41 @@ async function bootstrap() {
   const requestLogger = new LoggerUtil('Request');
   const responseLogger = new LoggerUtil('Response');
 
-  app
-    .getHttpAdapter()
-    .getInstance()
-    .addHook('onRequest', (req: any, reply: any, done: any) => {
-      if (
-        !req.originalUrl.startsWith('/api') &&
-        !req.originalUrl.startsWith('/favicon')
-      ) {
-        req.startTime = Date.now();
-        requestLogger.http(`${req.method} ${req.originalUrl}`);
-      }
+  const shouldLog = (url: string): boolean => {
+    return !(
+      url.startsWith('/api') ||
+      url.startsWith('/favicon') ||
+      url.startsWith('/auth/google/callback')
+    );
+  };
 
-      done();
-    });
+  const fastify = app.getHttpAdapter().getInstance();
 
-  app
-    .getHttpAdapter()
-    .getInstance()
-    .addHook('onSend', (req: any, reply: any, payload: any, done: any) => {
-      if (
-        !req.originalUrl.startsWith('/api') &&
-        !req.originalUrl.startsWith('/favicon')
-      ) {
-        const duration = Date.now() - req.startTime;
+  fastify.addHook('onRequest', (req: any, reply: any, done: () => void) => {
+    if (shouldLog(req.originalUrl)) {
+      req.startTime = Date.now();
+      requestLogger.http(`${req.method} ${req.originalUrl}`);
+    }
+    done();
+  });
+
+  fastify.addHook(
+    'onSend',
+    (req: any, reply: any, payload: any, done: () => void) => {
+      if (shouldLog(req.originalUrl)) {
+        const duration = Date.now() - (req.startTime || Date.now());
 
         if (reply.statusCode < 300 || reply.statusCode > 399) {
-          responseLogger.debug(`response body: `, payload);
+          responseLogger.debug('response body:', payload);
         }
 
         responseLogger.http(
           `${req.method} ${req.originalUrl} - ${reply.statusCode} ${STATUS_CODES[reply.statusCode]} - ${duration}ms`,
         );
       }
-
       done();
-    });
+    },
+  );
 
   await app.listen(PORT, '0.0.0.0');
   logger.info(`Application started on port ${PORT}`);
