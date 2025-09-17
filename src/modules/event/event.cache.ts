@@ -3,7 +3,7 @@ import { AuthSocket } from './event.type';
 
 @Injectable()
 export class EventCache {
-  private readonly users: Map<string, AuthSocket>;
+  private readonly users = new Map<string, AuthSocket>();
 
   public addUser(userId: string, socket: AuthSocket) {
     this.users.set(userId, socket);
