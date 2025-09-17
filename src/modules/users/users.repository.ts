@@ -8,6 +8,7 @@ export class UsersRepository extends BaseRepository {
     return this.prisma.user.findUnique({
       where: { id: userId },
       select: {
+        id: true,
         email: true,
         name: true,
         username: true,
@@ -31,6 +32,7 @@ export class UsersRepository extends BaseRepository {
       where: { id },
       data,
       select: {
+        id: true,
         email: true,
         name: true,
         username: true,

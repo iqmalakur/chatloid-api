@@ -22,23 +22,29 @@ export class ChatsService extends BaseService {
       keyword || '',
     );
 
-    return chatRooms.map((room) => {
-      const userContact = userId === room.user1.id ? room.user2 : room.user1;
+    return chatRooms
+      .map((room) => {
+        const userContact = userId === room.user1.id ? room.user2 : room.user1;
 
-      const lastMessage = room.messages[0]
-        ? {
-            content: room.messages[0].content,
-            createdAt: room.messages[0].sentAt,
-          }
-        : null;
+        const lastMessage = room.messages[0]
+          ? {
+              content: room.messages[0].content,
+              createdAt: room.messages[0].sentAt,
+            }
+          : null;
 
-      return {
-        id: room.id,
-        picture: userContact.picture,
-        displayName: userContact.name,
-        lastMessage,
-      };
-    });
+        return {
+          id: room.id,
+          picture: userContact.picture,
+          displayName: userContact.name,
+          lastMessage,
+        };
+      })
+      .sort(
+        (a, b) =>
+          (b.lastMessage?.createdAt.getTime() ?? 0) -
+          (a.lastMessage?.createdAt.getTime() ?? 0),
+      );
   }
 
   public async handleCheckExistingChatRoom(
