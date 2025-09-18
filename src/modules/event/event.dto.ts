@@ -12,6 +12,10 @@ export class DeleteMessageDto {
   public readonly id: string;
 }
 
+export class UserStatusDto {
+  public readonly id: string;
+}
+
 export class NewMessageDto {
   public readonly id: string;
   public readonly chatRoomId: string;

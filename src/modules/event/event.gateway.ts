@@ -19,6 +19,7 @@ import {
   EditMessageDto,
   NewMessageDto,
   SendMessageDto,
+  UserStatusDto,
 } from './event.dto';
 
 @WebSocketGateway({
@@ -111,6 +112,18 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.handleResponse(client, () =>
       this.service.handleDeleteMessage(message.id, client.data.userId),
     );
+  }
+
+  @SubscribeMessage('get_user_status')
+  public async getUserStatus(
+    @MessageBody() userStatus: UserStatusDto,
+    @ConnectedSocket() client: AuthSocket,
+  ) {
+    const status = this.cache.getUserStatus(userStatus.id);
+    return client.emit('user_status', {
+      userId: userStatus.id,
+      status,
+    });
   }
 
   private async handleResponse(

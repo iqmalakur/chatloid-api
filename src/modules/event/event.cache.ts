@@ -16,4 +16,8 @@ export class EventCache {
   public getUserSocket(userId: string): AuthSocket | undefined {
     return this.users.get(userId);
   }
+
+  public getUserStatus(userId: string): string {
+    return this.users.get(userId) ? 'Online' : 'Offline';
+  }
 }

@@ -125,16 +125,18 @@ export class ChatsService extends BaseService {
 
     return {
       id: chatRoom.id,
+      userContactId: userContact.id,
       displayName: userContact.name,
       picture: userContact.picture,
-      status: 'offline',
-      chats: chatRoom.messages.map((message) => ({
-        id: message.id,
-        content: message.content,
-        createdAt: message.sentAt,
-        isEdited: message.editedAt != null,
-        sender: message.senderId,
-      })),
+      chats: chatRoom.messages
+        .map((message) => ({
+          id: message.id,
+          content: message.content,
+          createdAt: message.sentAt,
+          isEdited: message.editedAt != null,
+          sender: message.senderId,
+        }))
+        .reverse(),
     };
   }
 }

@@ -112,7 +112,7 @@ export class ChatsRepository extends BaseRepository {
             editedAt: true,
           },
           take: 25,
-          orderBy: { sentAt: 'asc' },
+          orderBy: { sentAt: 'desc' },
         },
       },
     });
