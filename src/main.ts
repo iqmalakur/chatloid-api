@@ -11,7 +11,14 @@ async function bootstrap() {
   const logger = new LoggerUtil('Main');
 
   const app = await NestFactory.create(AppModule, new FastifyAdapter());
-  app.enableCors();
+
+  app.enableCors({
+    origin: true,
+    methods: '*',
+    allowedHeaders: '*',
+    credentials: true,
+  });
+
   logger.info('Loaded app modules');
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
