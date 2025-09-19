@@ -40,6 +40,7 @@ export class ChatsService extends BaseService {
           lastMessage,
         };
       })
+      .filter((room) => room.lastMessage != null)
       .sort(
         (a, b) =>
           (b.lastMessage?.createdAt.getTime() ?? 0) -
