@@ -20,7 +20,11 @@ export class ContactRequestsService extends BaseService {
     userId: string,
   ): Promise<ContactRequestsResDto[]> {
     const contactRequests = await this.repository.findContactRequests(userId);
-    return contactRequests.map((request) => request.userOne);
+    return contactRequests.map((request) => ({
+      ...request.userOne,
+      isAccepted: request.isAccepted,
+      createdAt: request.createdAt,
+    }));
   }
 
   public async handleUpdateContactRequests(

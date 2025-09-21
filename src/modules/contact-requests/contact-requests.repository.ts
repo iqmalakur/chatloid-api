@@ -10,12 +10,22 @@ export class ContactRequestsRepository extends BaseRepository {
   public async findContactRequests(
     userId: string,
   ): Promise<ContactRequestSelection[]> {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
     return this.prisma.contact.findMany({
-      where: { userTwoId: userId, isAccepted: false },
+      where: {
+        userTwoId: userId,
+        createdAt: {
+          gte: threeDaysAgo,
+        },
+      },
       select: {
         userOne: {
-          select: { id: true, name: true, username: true, createdAt: true },
+          select: { id: true, name: true, username: true },
         },
+        isAccepted: true,
+        createdAt: true,
       },
     });
   }

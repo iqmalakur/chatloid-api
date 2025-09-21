@@ -73,7 +73,7 @@ describe('ContactRequestsController (e2e)', () => {
 
   describe('GET /contact-requests', () => {
     it('should return list of contact requests', async () => {
-      await prisma.contact.create({
+      const contact = await prisma.contact.create({
         data: {
           userOneId: target.id,
           userTwoId: user.id,
@@ -91,7 +91,7 @@ describe('ContactRequestsController (e2e)', () => {
       expect(res.body[0].username).toBe(target.username);
       expect(res.body[0].name).toBe(target.name);
       expect(new Date(res.body[0].createdAt).getTime()).toBe(
-        target.createdAt.getTime(),
+        contact.createdAt.getTime(),
       );
     });
   });

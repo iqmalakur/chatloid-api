@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsUUID } from 'class-validator';
 
 export class ContactRequestsResDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -13,11 +13,14 @@ export class ContactRequestsResDto {
 
   @ApiProperty({ example: '2025-09-05T10:15:30.000Z' })
   public readonly createdAt: Date;
+
+  @ApiProperty({ example: false })
+  public readonly isAccepted: boolean;
 }
 
 export class ContactRequestsParamDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  @IsString()
+  @IsUUID()
   public readonly targetId: string;
 }
 
