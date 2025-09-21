@@ -68,6 +68,7 @@ describe('UsersController (e2e)', () => {
         .expect(200);
 
       expect(res.body).toEqual({
+        id: existingUserId,
         email: 'johndoe@gmail.com',
         username: 'johndoe',
         name: expect.stringContaining('John'),
@@ -95,6 +96,7 @@ describe('UsersController (e2e)', () => {
         .expect(200);
 
       expect(res.body).toEqual({
+        id: existingUserId,
         email: 'johndoe@gmail.com',
         username: 'johndoe',
         name: 'John Updated',
