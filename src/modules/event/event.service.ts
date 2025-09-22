@@ -60,7 +60,7 @@ export class EventService extends BaseService {
       throw new Error('Failed to delete message');
     }
 
-    return this.buildNewMessageDto(message);
+    return this.buildNewMessageDto({ ...message, deletedAt: new Date() });
   }
 
   private buildNewMessageDto(message: NewMessageSelection): NewMessageDto {

@@ -49,7 +49,7 @@ export class EventRepository extends BaseRepository {
   ): Promise<NewMessageSelection | null> {
     return this.prisma.message.update({
       where: { id },
-      data: { content },
+      data: { content, editedAt: new Date() },
       select: {
         id: true,
         senderId: true,
