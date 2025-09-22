@@ -28,7 +28,7 @@ export class ChatsService extends BaseService {
 
         const lastMessage = room.messages[0]
           ? {
-              content: room.messages[0].content,
+              content: room.messages[0].content.slice(0, 50),
               createdAt: room.messages[0].sentAt,
             }
           : null;
