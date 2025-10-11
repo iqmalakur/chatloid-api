@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { BaseService } from '../shared/base.service';
 import { EventRepository } from './event.repository';
 import { NewMessageDto } from './event.dto';
-import { NewMessageSelection } from './event.type';
+import { ObjectId } from 'mongodb';
+import { MessageEntity } from './event.type';
 
 @Injectable()
 export class EventService extends BaseService {
@@ -29,7 +30,7 @@ export class EventService extends BaseService {
   }
 
   public async handleEditMessage(
-    messageId: string,
+    messageId: ObjectId,
     senderId: string,
     content: string,
   ): Promise<NewMessageDto> {
@@ -47,7 +48,7 @@ export class EventService extends BaseService {
   }
 
   public async handleDeleteMessage(
-    messageId: string,
+    messageId: ObjectId,
     senderId: string,
   ): Promise<NewMessageDto> {
     if (!(await this.repository.isMessageBelongsToUser(messageId, senderId))) {
@@ -63,14 +64,14 @@ export class EventService extends BaseService {
     return this.buildNewMessageDto({ ...message, deletedAt: new Date() });
   }
 
-  private buildNewMessageDto(message: NewMessageSelection): NewMessageDto {
+  private buildNewMessageDto(message: MessageEntity): NewMessageDto {
     const receiverId =
       message.senderId === message.chatRoom.user1Id
         ? message.chatRoom.user2Id
         : message.chatRoom.user1Id;
 
     return {
-      id: message.id,
+      id: message._id.toString(),
       chatRoomId: message.chatRoom.id,
       senderId: message.senderId,
       receiverId,

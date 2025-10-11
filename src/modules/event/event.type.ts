@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { DefaultEventsMap, Socket } from 'socket.io';
 
 export type SocketUser = {
@@ -17,12 +18,16 @@ export type ChatRoomUserSelection = {
   user2Id: string;
 };
 
-export type NewMessageSelection = {
-  id: string;
+export type MessageEntity = {
+  _id: ObjectId;
   senderId: string;
   content: string;
   sentAt: Date;
   editedAt: Date | null;
   deletedAt: Date | null;
-  chatRoom: ChatRoomUserSelection;
+  chatRoom: {
+    id: string;
+    user1Id: string;
+    user2Id: string;
+  };
 };

@@ -21,6 +21,7 @@ import {
   SendMessageDto,
   UserStatusDto,
 } from './event.dto';
+import { ObjectId } from 'mongodb';
 
 @WebSocketGateway({
   cors: {
@@ -95,9 +96,15 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: EditMessageDto,
     @ConnectedSocket() client: AuthSocket,
   ) {
+    if (!ObjectId.isValid(message.id)) {
+      client.emit('error', 'id is not valid');
+      return;
+    }
+
+    const messageId = new ObjectId(message.id);
     return this.handleResponse(client, () =>
       this.service.handleEditMessage(
-        message.id,
+        messageId,
         client.data.userId,
         message.content,
       ),
@@ -109,8 +116,14 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() message: DeleteMessageDto,
     @ConnectedSocket() client: AuthSocket,
   ) {
+    if (!ObjectId.isValid(message.id)) {
+      client.emit('error', 'id is not valid');
+      return;
+    }
+
+    const messageId = new ObjectId(message.id);
     return this.handleResponse(client, () =>
-      this.service.handleDeleteMessage(message.id, client.data.userId),
+      this.service.handleDeleteMessage(messageId, client.data.userId),
     );
   }
 
