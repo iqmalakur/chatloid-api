@@ -2,10 +2,10 @@
 # Use docker-compose.override.yml to override values (environment, ports, etc.)
 
 services:
-  db:
+  psql:
     image: postgres:17
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRES_USER=
       - POSTGRES_PASSWORD=
@@ -13,5 +13,16 @@ services:
     volumes:
       - chatloid-data:/var/lib/postgresql/data
 
+  mongodb:
+    image: mongodb/mongodb-community-server:8.2-ubi8
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=
+      - MONGO_INITDB_ROOT_PASSWORD=
+    volumes:
+      - chatloid-message-data:/data/db
+
 volumes:
   chatloid-data:
+  chatloid-message-data:
