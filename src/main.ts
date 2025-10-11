@@ -6,13 +6,11 @@ import { PORT } from './configs/app.config';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { STATUS_CODES } from 'http';
 import { ValidationPipe } from '@nestjs/common';
-import { closeDb, initDb } from './utils/mongo.util';
 
 async function bootstrap() {
   const logger = new LoggerUtil('Main');
 
   const app = await NestFactory.create(AppModule, new FastifyAdapter());
-  initDb();
 
   app.enableCors({
     origin: true,
@@ -98,17 +96,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-
-process.on('SIGINT', async () => {
-  await closeDb();
-  process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-  await closeDb();
-  process.exit(0);
-});
-
-process.on('exit', async () => {
-  await closeDb();
-});
