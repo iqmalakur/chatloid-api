@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../shared/base.repository';
 import { MessageEntity } from './event.type';
 import { Collection, ObjectId } from 'mongodb';

@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb';
+
 export type ChatRoomUserSelection = {
   id: string;
   name: string;
@@ -13,11 +15,11 @@ export type ChatRoomSelection = {
   id: string;
   user1: ChatRoomUserSelection;
   user2: ChatRoomUserSelection;
-  messages: LastMessageSelection[];
+  message: LastMessageSelection | null;
 };
 
 export type MessageSelection = {
-  id: string;
+  _id: ObjectId;
   senderId: string;
   content: string;
   sentAt: Date;

@@ -1,14 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../shared/base.repository';
 import { ChatRoomSelection, DetailChatRoomSelection } from './chats.type';
+import { PrismaService } from '../shared/prisma.service';
+import { MongoService } from '../shared/mongo.service';
+import { Collection } from 'mongodb';
+import { MessageEntity } from '../event/event.type';
 
 @Injectable()
 export class ChatsRepository extends BaseRepository {
+  private readonly collection: Collection<MessageEntity>;
+
+  public constructor(prisma: PrismaService, mongo: MongoService) {
+    super(prisma);
+    this.collection = mongo.getDatabase().collection('messages');
+  }
+
   public async findChatRooms(
     userId: string,
     keyword: string,
   ): Promise<ChatRoomSelection[]> {
-    return this.prisma.chatRoom.findMany({
+    const chatRooms = await this.prisma.chatRoom.findMany({
       where: {
         AND: [
           { OR: [{ user1Id: userId }, { user2Id: userId }] },
@@ -24,20 +35,44 @@ export class ChatsRepository extends BaseRepository {
         id: true,
         user1: { select: { id: true, name: true, picture: true } },
         user2: { select: { id: true, name: true, picture: true } },
-        messages: {
-          select: { content: true, sentAt: true },
-          take: 1,
-          orderBy: { sentAt: 'desc' },
-        },
       },
     });
+
+    const chatRoomIds = chatRooms.map((chatRoom) => chatRoom.id);
+
+    const messages = await this.collection
+      .aggregate([
+        {
+          $match: {
+            'chatRoom.id': { $in: chatRoomIds },
+          },
+        },
+        { $sort: { sentAt: -1 } },
+        {
+          $group: {
+            _id: '$chatRoom.id',
+            content: { $first: '$content' },
+            sentAt: { $first: '$sentAt' },
+          },
+        },
+      ])
+      .toArray();
+
+    const messagesMap = new Map<string, { content: string; sentAt: Date }>(
+      messages.map((message) => [message._id, message as any]),
+    );
+
+    return chatRooms.map((chatRoom) => ({
+      ...chatRoom,
+      message: messagesMap.get(chatRoom.id) ?? null,
+    }));
   }
 
   public async findExistingChatRoom(
     userId: string,
     contactId: string,
   ): Promise<ChatRoomSelection | null> {
-    return this.prisma.chatRoom.findFirst({
+    const chatRoom = await this.prisma.chatRoom.findFirst({
       where: {
         OR: [
           { user1Id: userId, user2Id: contactId },
@@ -48,13 +83,20 @@ export class ChatsRepository extends BaseRepository {
         id: true,
         user1: { select: { id: true, name: true, picture: true } },
         user2: { select: { id: true, name: true, picture: true } },
-        messages: {
-          select: { content: true, sentAt: true },
-          take: 1,
-          orderBy: { sentAt: 'desc' },
-        },
       },
     });
+
+    if (!chatRoom) return null;
+
+    const message = await this.collection.findOne(
+      { 'chatRoom.id': chatRoom.id },
+      { sort: { sentAt: -1 } },
+    );
+
+    return {
+      ...chatRoom,
+      message,
+    };
   }
 
   public async isUserExists(userId: string): Promise<boolean> {
@@ -66,26 +108,33 @@ export class ChatsRepository extends BaseRepository {
     user1Id: string,
     user2Id: string,
   ): Promise<ChatRoomSelection | null> {
-    return this.prisma.chatRoom.create({
+    const chatRoom = await this.prisma.chatRoom.create({
       data: { user1Id, user2Id },
       select: {
         id: true,
         user1: { select: { id: true, name: true, picture: true } },
         user2: { select: { id: true, name: true, picture: true } },
-        messages: {
-          select: { content: true, sentAt: true },
-          take: 1,
-          orderBy: { sentAt: 'desc' },
-        },
       },
     });
+
+    if (!chatRoom) return null;
+
+    const message = await this.collection.findOne(
+      { 'chatRoom.id': chatRoom.id },
+      { sort: { sentAt: -1 } },
+    );
+
+    return {
+      ...chatRoom,
+      message,
+    };
   }
 
   public async findChatRoomById(
     userId: string,
     chatRoomId: string,
   ): Promise<DetailChatRoomSelection | null> {
-    return this.prisma.chatRoom.findFirst({
+    const chatRoom = await this.prisma.chatRoom.findFirst({
       where: { id: chatRoomId, OR: [{ user1Id: userId }, { user2Id: userId }] },
       select: {
         id: true,
@@ -103,18 +152,18 @@ export class ChatsRepository extends BaseRepository {
             picture: true,
           },
         },
-        messages: {
-          select: {
-            id: true,
-            senderId: true,
-            content: true,
-            sentAt: true,
-            editedAt: true,
-          },
-          take: 25,
-          orderBy: { sentAt: 'desc' },
-        },
       },
     });
+
+    if (!chatRoom) return null;
+
+    const messages = await this.collection
+      .find({ 'chatRoom.id': chatRoom.id }, { sort: { sentAt: -1 }, limit: 25 })
+      .toArray();
+
+    return {
+      ...chatRoom,
+      messages,
+    };
   }
 }

@@ -24,7 +24,6 @@ model User {
   createdAt  DateTime     @db.Timestamp @default(now()) @map("created_at")
   updatedAt  DateTime     @db.Timestamp @updatedAt @map("updated_at")
 
-  messages   Message[]
   contacts   Contact[]    @relation("ContactOwner")
   inContacts Contact[]    @relation("ContactTarget")
   chatRooms1 ChatRoom[]   @relation("User1")
@@ -52,20 +51,6 @@ model ChatRoom {
 
   user1     User      @relation("User1", fields: [user1Id], references: [id])
   user2     User      @relation("User2", fields: [user2Id], references: [id])
-  messages  Message[]
 
   @@unique([user1Id, user2Id])
-}
-
-model Message {
-  id         String    @id @db.Uuid @default(uuid())
-  chatRoomId String    @db.Uuid @map("chat_room_id")
-  senderId   String    @db.Uuid @map("sender_id")
-  content    String    @db.Text
-  sentAt     DateTime  @db.Timestamp @default(now()) @map("sent_at")
-  editedAt   DateTime? @db.Timestamp @map("edited_at")
-  deletedAt  DateTime? @db.Timestamp @map("deleted_at")
-
-  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id])
-  sender     User      @relation(fields: [senderId], references: [id])
 }

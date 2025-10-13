@@ -1,6 +1,10 @@
+import { MongoClient } from 'mongodb';
 import { PrismaClient } from '../generated/prisma/client';
 
 const prisma = new PrismaClient();
+const client = new MongoClient(process.env.MONGODB_URL ?? '');
+const db = client.db('chatloid_messages');
+const collection = db.collection('messages');
 
 async function main() {
   console.log('Seeding database...');
@@ -64,28 +68,45 @@ async function main() {
 
     const now = new Date();
     // --- Create Messages ---
-    await tx.message.createMany({
-      data: [
-        {
-          chatRoomId: privateRoom.id,
-          senderId: user1.id,
-          content: 'Hey Jane, how are you?',
-          sentAt: now,
+
+    await collection.insertMany([
+      {
+        senderId: user1.id,
+        content: 'Hey Jane, how are you?',
+        sentAt: now,
+        editedAt: null,
+        deletedAt: null,
+        chatRoom: {
+          id: privateRoom.id,
+          user1Id: privateRoom.user1Id,
+          user2Id: privateRoom.user2Id,
         },
-        {
-          chatRoomId: privateRoom.id,
-          senderId: user2.id,
-          content: 'I’m good John, thanks!',
-          sentAt: new Date(now.getTime() + 60000),
+      },
+      {
+        senderId: user2.id,
+        content: 'I’m good John, thanks!',
+        editedAt: null,
+        deletedAt: null,
+        sentAt: new Date(now.getTime() + 60000),
+        chatRoom: {
+          id: privateRoom.id,
+          user1Id: privateRoom.user1Id,
+          user2Id: privateRoom.user2Id,
         },
-        {
-          chatRoomId: privateRoom.id,
-          senderId: user1.id,
-          content: 'Good day!',
-          sentAt: new Date(now.getTime() + 120000),
+      },
+      {
+        senderId: user1.id,
+        content: 'Good day!',
+        editedAt: null,
+        deletedAt: null,
+        sentAt: new Date(now.getTime() + 120000),
+        chatRoom: {
+          id: privateRoom.id,
+          user1Id: privateRoom.user1Id,
+          user2Id: privateRoom.user2Id,
         },
-      ],
-    });
+      },
+    ]);
   });
 
   console.log('Database seeding successfully');
@@ -98,4 +119,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await client.close();
   });

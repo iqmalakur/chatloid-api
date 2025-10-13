@@ -26,10 +26,10 @@ export class ChatsService extends BaseService {
       .map((room) => {
         const userContact = userId === room.user1.id ? room.user2 : room.user1;
 
-        const lastMessage = room.messages[0]
+        const lastMessage = room.message
           ? {
-              content: room.messages[0].content.slice(0, 50),
-              createdAt: room.messages[0].sentAt,
+              content: room.message.content.slice(0, 50),
+              createdAt: room.message.sentAt,
             }
           : null;
 
@@ -64,10 +64,10 @@ export class ChatsService extends BaseService {
         ? existingChatRoom.user2
         : existingChatRoom.user1;
 
-    const lastMessage = existingChatRoom.messages[0]
+    const lastMessage = existingChatRoom.message
       ? {
-          content: existingChatRoom.messages[0].content,
-          createdAt: existingChatRoom.messages[0].sentAt,
+          content: existingChatRoom.message.content,
+          createdAt: existingChatRoom.message.sentAt,
         }
       : null;
 
@@ -96,10 +96,10 @@ export class ChatsService extends BaseService {
     const userContact =
       userId === chatRoom.user1.id ? chatRoom.user2 : chatRoom.user1;
 
-    const lastMessage = chatRoom.messages[0]
+    const lastMessage = chatRoom.message
       ? {
-          content: chatRoom.messages[0].content,
-          createdAt: chatRoom.messages[0].sentAt,
+          content: chatRoom.message.content,
+          createdAt: chatRoom.message.sentAt,
         }
       : null;
 
@@ -131,7 +131,7 @@ export class ChatsService extends BaseService {
       picture: userContact.picture,
       chats: chatRoom.messages
         .map((message) => ({
-          id: message.id,
+          id: message._id.toString(),
           content: message.content,
           createdAt: message.sentAt,
           isEdited: message.editedAt != null,
