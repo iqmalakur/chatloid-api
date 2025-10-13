@@ -18,6 +18,8 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async onModuleInit() {
+    if (this.database) return;
+
     const uri = MONGODB_URL;
 
     if (!uri) {
