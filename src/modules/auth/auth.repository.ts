@@ -4,9 +4,7 @@ import { UserInsert, UserSelection } from './auth.type';
 
 @Injectable()
 export class AuthRepository extends BaseRepository {
-  public async findUserByGoogleId(
-    googleId: string,
-  ): Promise<UserSelection | null> {
+  public findUserByGoogleId(googleId: string): Promise<UserSelection | null> {
     return this.prisma.user.findFirst({
       select: { id: true },
       where: { googleId },
@@ -17,7 +15,7 @@ export class AuthRepository extends BaseRepository {
     return (await this.prisma.user.count({ where: { username } })) > 0;
   }
 
-  public async saveUser(user: UserInsert): Promise<UserSelection | null> {
+  public saveUser(user: UserInsert): Promise<UserSelection | null> {
     return this.prisma.user.create({
       data: {
         googleId: user.googleId,

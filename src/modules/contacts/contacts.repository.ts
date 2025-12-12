@@ -5,7 +5,7 @@ import { UserSelection } from '../auth/auth.type';
 
 @Injectable()
 export class ContactsRepository extends BaseRepository {
-  public async findUserContacts(
+  public findUserContacts(
     userId: string,
     keyword: string,
   ): Promise<ContactSelection[]> {
@@ -30,9 +30,7 @@ export class ContactsRepository extends BaseRepository {
     });
   }
 
-  public async findUserByUsername(
-    username: string,
-  ): Promise<UserSelection | null> {
+  public findUserByUsername(username: string): Promise<UserSelection | null> {
     return this.prisma.user.findFirst({
       where: { username },
       select: { id: true },
@@ -56,7 +54,7 @@ export class ContactsRepository extends BaseRepository {
     return contact;
   }
 
-  public async acceptContact(
+  public acceptContact(
     userOneId: string,
     userTwoId: string,
   ): Promise<AddContactSelection | null> {
@@ -66,7 +64,7 @@ export class ContactsRepository extends BaseRepository {
     });
   }
 
-  public async addContact(
+  public addContact(
     userOneId: string,
     userTwoId: string,
   ): Promise<AddContactSelection | null> {

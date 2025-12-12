@@ -7,7 +7,7 @@ import {
 
 @Injectable()
 export class ContactRequestsRepository extends BaseRepository {
-  public async findContactRequests(
+  public findContactRequests(
     userId: string,
   ): Promise<ContactRequestSelection[]> {
     const threeDaysAgo = new Date();
@@ -40,7 +40,7 @@ export class ContactRequestsRepository extends BaseRepository {
     return result > 0;
   }
 
-  public async updateOrDeleteContactRequests(
+  public updateOrDeleteContactRequests(
     userOneId: string,
     userTwoId: string,
     isAccepted: boolean,
