@@ -8,10 +8,14 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { Collection, MongoClient, ObjectId } from 'mongodb';
+import { MessageEntity } from 'src/modules/event/event.type';
+import { MONGODB_URL } from 'src/configs/mongo.config';
 
 describe('ChatsController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
+  let collection: Collection<MessageEntity>;
 
   let ucup: any;
   let otong: any;
@@ -19,6 +23,16 @@ describe('ChatsController (e2e)', () => {
   beforeAll(async () => {
     prisma = new PrismaClient();
     await prisma.$connect();
+
+    const mongoClient = new MongoClient(MONGODB_URL ?? '');
+
+    try {
+      await mongoClient.connect();
+      const database = mongoClient.db('chatloid_messages');
+      collection = database.collection('messages');
+    } catch (error) {
+      throw error;
+    }
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -34,9 +48,7 @@ describe('ChatsController (e2e)', () => {
 
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
-  });
 
-  beforeAll(async () => {
     ucup = await prisma.user.create({
       data: {
         username: 'ucup',
@@ -78,17 +90,23 @@ describe('ChatsController (e2e)', () => {
         },
       });
 
-      await prisma.message.create({
-        data: {
-          chatRoomId: chatRoom.id,
-          senderId: ucup.id,
-          content: 'Hello Otong!',
+      await collection.insertOne({
+        _id: new ObjectId(),
+        senderId: ucup.id,
+        content: 'Hello Otong!',
+        sentAt: new Date(),
+        editedAt: null,
+        deletedAt: null,
+        chatRoom: {
+          id: chatRoom.id,
+          user1Id: chatRoom.user1Id,
+          user2Id: chatRoom.user2Id,
         },
       });
     });
 
     afterAll(async () => {
-      await prisma.message.deleteMany({ where: { chatRoomId: chatRoom.id } });
+      await collection.deleteMany({ chatRoom: { id: chatRoom.id } });
       await prisma.chatRoom.deleteMany({ where: { id: chatRoom.id } });
     });
 
@@ -146,11 +164,17 @@ describe('ChatsController (e2e)', () => {
         },
       });
 
-      await prisma.message.create({
-        data: {
-          chatRoomId: chatRoom.id,
-          senderId: ucup.id,
-          content: 'Hello Otong!',
+      await collection.insertOne({
+        _id: new ObjectId(),
+        senderId: ucup.id,
+        content: 'Hello Otong!',
+        sentAt: new Date(),
+        editedAt: null,
+        deletedAt: null,
+        chatRoom: {
+          id: chatRoom.id,
+          user1Id: chatRoom.user1Id,
+          user2Id: chatRoom.user2Id,
         },
       });
 
@@ -160,7 +184,7 @@ describe('ChatsController (e2e)', () => {
         .send({ contactId: otong.id })
         .expect(200);
 
-      await prisma.message.deleteMany({ where: { chatRoomId: chatRoom.id } });
+      await collection.deleteMany({ chatRoom: { id: chatRoom.id } } as any);
       await prisma.chatRoom.deleteMany({ where: { id: chatRoom.id } });
 
       expect(res.body.id).toBe(chatRoom.id);
