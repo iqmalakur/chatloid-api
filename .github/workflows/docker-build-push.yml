@@ -1,10 +1,9 @@
 name: Docker Build Image and Push to Docker Hub
 
 on:
-  push:
-    branches: ['main']
-  pull_request:
-    branches: ['main']
+  workflow_run:
+    workflows: ['Run Unit Testing']
+    types: ['completed']
 
 jobs:
   build:
