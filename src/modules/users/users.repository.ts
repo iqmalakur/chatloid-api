@@ -24,7 +24,7 @@ export class UsersRepository extends BaseRepository {
     return result > 0;
   }
 
-  public async updateUser(
+  public updateUser(
     id: string,
     data: UserUpdateFields,
   ): Promise<UserInfoSelection | null> {
