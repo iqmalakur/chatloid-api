@@ -38,6 +38,11 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/chatloid?schema=public'
+      MONGODB_URL: 'mongodb://mongo:mongo@localhost:27017'
+      SECRET_KEY: test
+
     steps:
       - uses: actions/checkout@v6
 
@@ -67,10 +72,6 @@ jobs:
         run: pnpm migrate
 
       - name: Run integration testing
-        env:
-          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/chatloid?schema=public'
-          MONGODB_URL: 'mongodb://mongo:mongo@localhost:27017'
-          SECRET_KEY: test
         run: pnpm test:e2e
 
   docker-image:
