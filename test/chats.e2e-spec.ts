@@ -26,13 +26,9 @@ describe('ChatsController (e2e)', () => {
 
     const mongoClient = new MongoClient(MONGODB_URL ?? '');
 
-    try {
-      await mongoClient.connect();
-      const database = mongoClient.db('chatloid_messages');
-      collection = database.collection('messages');
-    } catch (error) {
-      throw error;
-    }
+    await mongoClient.connect();
+    const database = mongoClient.db('chatloid_messages');
+    collection = database.collection('messages');
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],

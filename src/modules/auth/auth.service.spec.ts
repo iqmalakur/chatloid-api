@@ -157,6 +157,7 @@ describe('AuthService unit test', () => {
         name: 'abc',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.findUserByGoogleId).toHaveBeenCalled();
       expect(user.id).toBe('1');
     });
@@ -174,6 +175,7 @@ describe('AuthService unit test', () => {
         name: 'abc',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(repository.saveUser).toHaveBeenCalled();
       expect(user.id).toBe('1');
     });

@@ -110,7 +110,7 @@ export class AuthService extends BaseService {
       );
     }
 
-    let user = await this.repository.findUserByGoogleId(data.id);
+    const user = await this.repository.findUserByGoogleId(data.id);
 
     if (!user) {
       const newUser = await this.repository.saveUser({

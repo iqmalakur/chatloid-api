@@ -41,7 +41,7 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger = new LoggerUtil(this.constructor.name);
   }
 
-  public async handleConnection(client: AuthSocket) {
+  public handleConnection(client: AuthSocket) {
     const token: string = client.handshake.auth?.token;
     if (!token) {
       client.emit('error', 'Token is not provided');
@@ -65,7 +65,7 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  public async handleDisconnect(client: AuthSocket) {
+  public handleDisconnect(client: AuthSocket) {
     const userId = client.data.userId;
     this.cache.removeUser(userId);
 
@@ -128,7 +128,7 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('get_user_status')
-  public async getUserStatus(
+  public getUserStatus(
     @MessageBody() userStatus: UserStatusDto,
     @ConnectedSocket() client: AuthSocket,
   ) {
@@ -162,6 +162,7 @@ export class EventGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       return verify(token, SECRET_KEY).sub as string;
     } catch (err) {
+      this.logger.error(err);
       return null;
     }
   }

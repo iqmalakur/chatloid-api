@@ -7,9 +7,16 @@ import {
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { verify } from 'jsonwebtoken';
 import { SECRET_KEY } from 'src/configs/app.config';
+import { LoggerUtil } from 'src/utils/logger.util';
 
 @Injectable()
 export class TokenMiddleware implements NestMiddleware {
+  private readonly logger: LoggerUtil;
+
+  public constructor() {
+    this.logger = new LoggerUtil(this.constructor.name);
+  }
+
   use(
     req: FastifyRequest['raw'],
     reply: FastifyReply,
@@ -42,6 +49,7 @@ export class TokenMiddleware implements NestMiddleware {
     try {
       return verify(token, SECRET_KEY).sub as string;
     } catch (err) {
+      this.logger.error(err);
       return null;
     }
   }
